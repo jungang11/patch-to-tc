@@ -92,6 +92,7 @@ This stage exists because patch notes and diffs disagree more often than is comf
 - **TC count cap per invocation**: hard stop at 30. If the change set warrants more, pause and ask the user to scope or batch.
 - **No real data in output.** Generic placeholders for any field that would otherwise leak company information.
 - **Notion writes are gated.** No automatic writes. `notion-draft` and `notion-write` require user confirmation after schema mapping is shown.
+- **`allowed-tools` is pre-approval, not a sandbox.** The frontmatter list above declares which tools the skill MAY call. Whether each call is appropriate at each step is enforced only by the workflow rules in this file's body. Downstream users must not infer that the frontmatter alone makes the skill safe.
 
 ## Output format
 
@@ -115,7 +116,7 @@ These are observed failure modes. The skill must avoid all of them.
 - **Dev-note-over-diff or diff-over-dev-note.** Both are sources. Disagreements go to Stage 4, not to a silent choice.
 - **Notion write without schema confirmation.** Always run the schema-mapping protocol. Skipping it is the most common way to corrupt a downstream database.
 - **TCs for code with no observable user behavior.** Internal refactors that don't change behavior produce no TCs; they may produce a Cross-source flag if the patch note claims user-visible improvement.
-- **Real data in output.** Real company names, real account IDs, real Notion URLs, real keystore paths. Every output is reviewable by people outside the team.
+- **Real data in output.** Real company names, real account IDs, real Notion URLs, real keystore paths, environment variables (`$HOME`, `$USER`, API tokens), absolute filesystem paths outside the repo, or user identity (name, email) extracted from local project files. Every output is reviewable by people outside the team. The Source/Risk column is free-form rich text and the easiest place to leak — keep it strictly limited to git path + commit hash + Notion section + risk category from taxonomy.
 - **Generating TCs to "cover" unverified Notion claims.** If the **patch note** claims a fix the diff doesn't show, that's a Cross-source flag, not a TC. The **dev note** is treated differently: as an internal technical document it is higher-trust, so when a dev-note claim has no direct diff evidence (e.g., a server-side change referenced in dev note without a paired client change), generate a TC and mark the Source/Risk column with `dev-note only, diff unverified` so a human reviewer can verify it. Never generate a TC when neither the patch note nor the dev note supports the claim.
 
 ## References

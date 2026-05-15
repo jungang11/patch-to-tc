@@ -17,7 +17,7 @@ After running this:
 2. Grant access only to the workspace pages you intend to use (not "all pages")
 3. Verify with `/mcp` again that the connection shows as connected
 
-> **Do not commit your authenticated `.mcp.json` if it contains tokens.** Tokens belong in environment variables or in `.mcp.local.json` (which `.gitignore` blocks).
+> **Do not commit your authenticated `.mcp.json` if it contains tokens.** Tokens belong in environment variables or in `.mcp.local.json` (which `.gitignore` blocks). The current repo's `.gitignore` (v0.1) lists both `.mcp.json` and `.mcp.local.json` as ignored — downstream forks must verify their own `.gitignore` retains these entries.
 
 ---
 

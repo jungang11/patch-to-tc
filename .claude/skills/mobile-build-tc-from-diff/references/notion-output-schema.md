@@ -53,7 +53,7 @@ For Notion write, the skill expects these property types on the target database.
 | `Title` | Rich text **or** Title (if `TC ID` uses unique-id) | |
 | `Preconditions`, `Steps`, `Expected Result` | Rich text (multi-line) | Inline test data goes here when needed; no separate `Test Data` column |
 | `Automation Candidate` | Checkbox **or** Select (`Yes`/`No`) | |
-| `Source/Risk` | Rich text | Free-form to allow git path + commit + risk categories in one field |
+| `Source/Risk` | Rich text | Free-form to allow git path + commit + risk categories in one field. **Must not include**: environment variables, absolute filesystem paths outside the repo, API tokens/keys, user identity (name, email), or internal-only URLs. The skill is responsible for keeping this column strictly limited before any Notion write. |
 | `Status` | Status property **or** Select | Required for `notion-draft` to set the row to `Draft` |
 
 If any actual property has an incompatible type, abort the write and output Markdown.
