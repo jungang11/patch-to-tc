@@ -75,3 +75,4 @@ Without this signal, a reviewer might add a "missing combination" TC that the pa
 - **Pairwise on 2 axes.** Full combinatorial is small enough (2² = 4) to test directly. Pairwise saves nothing.
 - **Hiding the matrix.** A pairwise-reduced TC without the `pairwise-set` indicator looks like a complete coverage gap to reviewers. Always document.
 - **Treating pairwise as a quality replacement for focused TCs.** Pairwise is scenario coverage, not feature coverage. A bug in the happy path of `high-end / Android 14` still needs its own focused TC.
+- **Mixing focused Edge TCs into the pairwise matrix.** An Edge TC targeting a specific failure mode (e.g., "double-tap does not double-fire") stays separate from the pairwise set, which covers scenario combinations across axes. Folding focused failure-mode TCs into the matrix obscures the failure mode they exist to catch.

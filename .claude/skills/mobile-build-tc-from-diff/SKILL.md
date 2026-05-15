@@ -41,7 +41,7 @@ The skill runs five sequential stages with explicit confirmation gates at the en
 
 ### Stage 2 — Triage
 
-1. For each changed file, match it against the signal patterns in `references/tc-taxonomy.md`. A file may match multiple categories — record all matches.
+1. For each changed file, match it against the signal patterns in `references/tc-taxonomy.md`. A file may match multiple categories — record all matches. Any heuristic labels emitted by `scripts/collect_diff_context.sh` (e.g., `data-migration`, `async-or-loader-change`) are hints, not classifications — always re-match files against the canonical taxonomy categories before deciding TC types.
 2. For each matched category, decide which TC types are needed (Build Gate / Smoke / Regression / Edge) based on the category's `TC types to generate` field.
 3. Scope check: if the file count exceeds 50 OR the cumulative planned TCs exceed 30, stop and ask the user to scope or batch. For planning purposes, estimate **2–4 TCs per matched category** (Build Gate ≤ 1, Smoke 1–2, Regression 1–2, Edge 1–2 — fewer when the change is narrow). Do not silently generate fewer TCs than the taxonomy implies — that hides what was dropped.
 4. Produce a triage summary in Markdown: a table with columns `File | Categories matched | TC types planned | Platforms (A/iOS/both)`. This summary is consumed by Stage 3 and shown to the user for review.
@@ -69,6 +69,8 @@ This stage exists because patch notes and diffs disagree more often than is comf
    - Patch note claims a fix → does the diff show a corresponding change?
    - Diff shows a substantial change → is it mentioned in either note?
    - Dev note describes a behavior → does the diff implement it?
+
+   A claim is **substantive** when it describes user-observable behavior, a measurable performance change, a specific bug fix, or a permission/capability change. Release dates, marketing copy variations, document metadata, and minor wording differences are not substantive and do not need cross-source verification.
 3. Each unsupported or contradicted claim becomes one row in the **Cross-source flags** output section, with columns `Claim | Source | Supporting evidence | Suggested action`.
 4. Never generate a TC for an unverified Notion claim. The flag is the output; inventing TCs to "cover" the gap is the failure mode this stage exists to prevent.
 5. **Gate**: present the flag table to the user. Wait for one of: "proceed", "drop these flags", or "stop and clarify with the author". Default when the user is non-interactive is `proceed` — flags remain in the final output.
