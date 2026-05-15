@@ -45,6 +45,7 @@ mobile-tc-harness/
 ├── LICENSE                      ← MIT
 ├── AGENTS.md                    ← cross-agent working rules (Codex, future agents)
 ├── CLAUDE.md                    ← Claude Code's working rules for THIS repo
+├── WORK_LOG.md                  ← session work log (read first in a new session)
 ├── .gitignore
 ├── docs/
 │   ├── REFERENCES.md            ← reference repos to read before designing
@@ -53,19 +54,26 @@ mobile-tc-harness/
 │   ├── ios-prepared-guidelines.md
 │   ├── notion-mcp-safety.md
 │   └── eval-strategy.md
-├── examples/
-│   ├── sample-patch-note.md
-│   ├── sample-dev-note.md
-│   ├── sample-diff-summary.md
-│   └── sample-output-tc-table.md
 └── .claude/
     ├── CLAUDE.md.example        ← template for downstream projects
     └── skills/
         └── mobile-build-tc-from-diff/
             ├── SKILL.md
             ├── references/
+            │   ├── tc-taxonomy.md
+            │   ├── notion-context-policy.md
+            │   ├── notion-output-schema.md
+            │   └── pairwise-strategy.md
+            ├── examples/
+            │   ├── sample-patch-note.md
+            │   ├── sample-dev-note.md
+            │   ├── sample-diff-summary.md
+            │   └── sample-output-tc-table.md
             ├── scripts/
+            │   └── collect_diff_context.sh
             └── evals/
+                ├── trigger-evals.yaml
+                └── functional-evals.yaml
 ```
 
 ---
