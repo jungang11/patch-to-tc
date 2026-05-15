@@ -1,0 +1,105 @@
+# trigger-evals.yaml
+#
+# Tests whether the mobile-build-tc-from-diff skill ACTIVATES on the right prompts.
+# These are not output-quality tests — see functional-evals.yaml for that.
+#
+# How to run (v0.1 — manual):
+#   1. Open a fresh Claude Code session in a directory with this skill installed
+#   2. For each entry, send the `prompt` to Claude
+#   3. Observe whether the skill triggers (Claude invokes /mobile-build-tc-from-diff
+#      or loads SKILL.md into context)
+#   4. Compare against `should_trigger`
+#   5. Record pass / fail
+#
+# How to read failures:
+#   - should_trigger=true but didn't → description in SKILL.md is too narrow
+#   - should_trigger=false but did → description is too broad / matches wrong contexts
+#   Fix the description, not the prompt.
+
+cases:
+  # ------------------------------------------------------------
+  # Cases that SHOULD trigger
+  # ------------------------------------------------------------
+
+  - id: explicit-korean-patch-note
+    prompt: "이번 패치노트와 git diff 기반으로 빌드 테스트 TC 만들어줘"
+    should_trigger: true
+    rationale: "Explicit TC generation, mentions patch note + diff — the core trigger context"
+
+  - id: explicit-english-commit-range
+    prompt: "Generate test cases from main..HEAD for the Android build"
+    should_trigger: true
+    rationale: "Explicit commit range + platform"
+
+  - id: post-merge-context
+    prompt: "방금 v2.4.0 머지했어. 빌드 TC 좀 만들어줘"
+    should_trigger: true
+    rationale: "Post-merge + TC request — primary intended usage"
+
+  - id: review-changes-make-tc
+    prompt: "변경사항 review해서 테스트케이스 뽑아줘"
+    should_trigger: true
+    rationale: "Korean equivalent of 'review and generate TCs'"
+
+  - id: slash-command-direct
+    prompt: "/mobile-build-tc-from-diff android HEAD~1..HEAD"
+    should_trigger: true
+    rationale: "Direct slash-command invocation (always triggers regardless of description)"
+
+  - id: notion-mentioned
+    prompt: "Notion 패치노트 페이지랑 dev note 보고 TC 만들어줘"
+    should_trigger: true
+    rationale: "Notion + TC request — matches Notion-read mode trigger"
+
+  # ------------------------------------------------------------
+  # Cases that should NOT trigger
+  # ------------------------------------------------------------
+
+  - id: general-code-review
+    prompt: "이 PR 코드 리뷰 해줘"
+    should_trigger: false
+    rationale: "Code review is a different task. If a code-review skill exists, it should win."
+
+  - id: write-unit-tests-no-patch
+    prompt: "UserAuth 클래스에 대한 unit test 작성해줘"
+    should_trigger: false
+    rationale: "Unit test writing without a corresponding patch — different skill space"
+
+  - id: unrelated-task
+    prompt: "오늘 날씨 어때"
+    should_trigger: false
+    rationale: "Completely unrelated"
+
+  - id: feature-planning
+    prompt: "다음 분기에 어떤 기능 추가할지 brainstorm 해줘"
+    should_trigger: false
+    rationale: "Planning, not testing"
+
+  - id: bug-debugging
+    prompt: "로그인 시 crash가 나는데 원인 좀 찾아줘"
+    should_trigger: false
+    rationale: "Debugging, not TC generation"
+
+  - id: refactor-suggestion
+    prompt: "ContentLoader.cs 리팩토링 좀 제안해줘"
+    should_trigger: false
+    rationale: "Refactoring suggestion, not testing"
+
+  # ------------------------------------------------------------
+  # Edge cases — document the judgment call
+  # ------------------------------------------------------------
+
+  - id: ambiguous-tc-request
+    prompt: "테스트케이스 만들어줘"
+    should_trigger: false
+    rationale: |
+      Too vague. Without a patch/diff/commit-range context, the skill should ask for
+      clarification rather than fire. Mark this as 'do not trigger' and observe whether
+      Claude asks a clarifying question instead (preferred behavior).
+
+  - id: regression-test-suite-generic
+    prompt: "전체 회귀 테스트 케이스 한 번 다 만들어줘"
+    should_trigger: false
+    rationale: |
+      The skill is for CHANGE-BASED TC generation. Full regression suite is a different
+      task. Should decline or redirect to a regression-suite-specific skill.

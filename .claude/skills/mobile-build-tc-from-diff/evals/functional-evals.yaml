@@ -1,0 +1,166 @@
+# functional-evals.yaml
+#
+# Tests whether the mobile-build-tc-from-diff skill produces OUTPUTS that match expectations.
+# Run after the skill triggers correctly (see trigger-evals.yaml).
+#
+# How to run (v0.1 — manual):
+#   1. Set up a sandbox directory with the inputs in `mock_inputs`
+#   2. Run the skill against those inputs
+#   3. Check the output against `must_include` and `must_not_include`
+#   4. Record pass / fail and any new findings (add to this file)
+#
+# Future (v0.2):
+#   - Wire to GitHub Action using Claude Code SDK (`claude -p`)
+#   - Stream inputs, grep output for assertions
+
+cases:
+  # ============================================================
+  # Case 1: Single bug fix, small surface area
+  # ============================================================
+  - id: small-bugfix
+    description: |
+      Small fix to a single file. Should produce a focused set of TCs (3-8),
+      not over-generate.
+    mock_inputs:
+      diff_summary: |
+        Modified Assets/Scripts/Login/LoginValidator.cs (-2, +5)
+        Fixed: empty-password validation was permitting whitespace-only input.
+      commit_messages:
+        - "fix(login): treat whitespace-only password as empty"
+      patch_note: "로그인 시 공백만 입력해도 통과되던 문제 수정"
+      dev_note: "LoginValidator.IsValidPassword now trims input before length check"
+    must_include:
+      - "AND-login-001"  # at least one TC ID matching the feature
+      - "whitespace"  # the actual fix scenario
+      - "Source/Risk"  # required column populated
+      - "automation candidate"  # column present
+    must_not_include:
+      - "30 TCs"  # should not over-generate
+      - "iOS build successful"  # iOS prepared, not executed
+      - "(iOS|Android)/(Android|iOS)"  # must not merge platforms
+      - "<real Notion URL>"  # no leaked data
+    expected_tc_count_range: [3, 8]
+
+  # ============================================================
+  # Case 2: Schema migration (the worked example from samples/)
+  # ============================================================
+  - id: scriptableobject-migration
+    description: |
+      ScriptableObject schema change + migrator file added. High-risk pattern.
+      Should produce migration tests + corrupted-save edge case + iOS Prepared rows.
+    mock_inputs:
+      diff_summary: |
+        Modified Assets/Scripts/SeasonPass/SeasonPassData.cs
+        New Assets/Scripts/SeasonPass/SeasonPassMigrator.cs
+        Modified Assets/Data/SeasonPass/season5.asset
+      commit_messages:
+        - "feat(seasonpass): migrate v1 save schema to v2 RewardTier[]"
+      patch_note: "시즌 패스 시즌 5 오픈"
+      dev_note: |
+        v1 save format converted via SeasonPassMigrator.
+        Existing claimed rewards preserved. Migration runs on first launch after update.
+    must_include:
+      - "migration"
+      - "v1"  # v1 save handling
+      - "corrupted"  # edge case for bad data
+      - "duplicate"  # duplicate-reward concern from dev note
+      - "iOS Prepared"  # iOS row present
+      - "data-schema-change"  # risk category from taxonomy
+    must_not_include:
+      - "TC for code that has no observable user behavior"
+      - "lorem ipsum"  # no placeholder text
+      - "TODO"  # no incomplete fields
+    expected_tc_count_range: [6, 15]
+
+  # ============================================================
+  # Case 3: Cross-source disagreement (the high-value output)
+  # ============================================================
+  - id: notion-diff-disagreement
+    description: |
+      Patch note claims something the diff doesn't show.
+      Skill MUST surface this disagreement, not pick one source.
+    mock_inputs:
+      diff_summary: |
+        Modified Assets/Scripts/Content/ContentLoader.cs (async refactor)
+        No locale file changes.
+      commit_messages:
+        - "refactor(content): switch to async loading"
+      patch_note: |
+        - 콘텐츠 로딩 속도 향상
+        - 영어, 일본어 번역 누락 수정    # <- this is NOT in the diff
+      dev_note: "Async load refactor only. No translation work in this PR."
+    must_include:
+      - "Cross-source flag"
+      - "localization"  # the flagged category
+      - "Notion"  # mentioning the patch note source
+      - "diff"  # mentioning git as the other source
+      - "no matching change"  # acknowledging the discrepancy
+    must_not_include:
+      - "translation tests generated"  # should NOT invent TCs for the unverified claim
+      - "verified the translation fix"
+
+  # ============================================================
+  # Case 4: Lifecycle change (high blast radius)
+  # ============================================================
+  - id: lifecycle-change
+    description: |
+      Change to AppLifecycleHandler / OnApplicationPause.
+      Should generate regression-sweep TCs across multiple screens,
+      tagged as high-blast-radius.
+    mock_inputs:
+      diff_summary: |
+        Modified Assets/Scripts/Lifecycle/AppLifecycleHandler.cs
+        OnApplicationPause(false) now re-initializes GL context.
+      commit_messages:
+        - "fix(lifecycle): re-init GL on resume to prevent black screen"
+      patch_note: "백그라운드 복귀 시 검은 화면 수정"
+      dev_note: "Black screen was caused by GL context loss; explicit re-init added."
+    must_include:
+      - "Build Gate"  # this is high enough impact to need a gate
+      - "regression"  # regression sweep
+      - "broad-regression"  # the risk flag
+      - "camera"  # an example of "resume from intent" — common failure path
+      - "deep background"  # extended background scenario
+    must_not_include:
+      - "only 1 TC"  # lifecycle is never single-TC
+
+  # ============================================================
+  # Case 5: Hard scope cap
+  # ============================================================
+  - id: huge-patch-must-scope
+    description: |
+      Simulate a 200-file patch. Skill should NOT generate 200+ TCs.
+      It must pause and ask the user to scope.
+    mock_inputs:
+      diff_summary: |
+        200 files changed across UI, content, networking, lifecycle, audio, save, settings.
+      commit_messages:
+        - "merge: v3.0 major version bump (combined work from 4 teams)"
+      patch_note: "v3.0 메이저 업데이트"
+      dev_note: "Combined release of 4 feature teams."
+    must_include:
+      - "pause"  # or "scope" — skill should slow down
+      - "batch"  # suggest batching
+    must_not_include:
+      - "TC IDs from AND-001 through AND-100"  # avoid mass generation
+    expected_behavior: "Skill stops, asks user to narrow scope or batch into multiple invocations"
+
+# ============================================================
+# Notes for failures
+# ============================================================
+notes: |
+  When a case fails:
+
+  1. Identify the exact failure (missing assertion, false positive, scope blowup).
+  2. Trace to the relevant file:
+     - Missing field in output → SKILL.md output format
+     - Wrong risk classification → references/tc-taxonomy.md
+     - Mass generation → SKILL.md "Constraints" section
+     - Real data leaked → examples/ files
+     - Cross-source missed → SKILL.md Stage 4
+  3. Add the failure as a new case here (with the actual diff/notes that caused it).
+  4. Fix the source file.
+  5. Re-run.
+
+  The skill improves by accumulating real-world failures into this eval file,
+  not by adding more synthetic cases.

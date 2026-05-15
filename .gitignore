@@ -1,0 +1,82 @@
+# ========================================
+# Privacy / secrets — NEVER commit these
+# ========================================
+
+# The real CLAUDE.md (only CLAUDE.md.example is committed)
+.claude/CLAUDE.md
+
+# Local-only Claude Code settings
+.claude/settings.local.json
+
+# MCP config that may contain tokens
+.mcp.json
+.mcp.local.json
+
+# Environment / credentials
+.env
+.env.*
+*.secret
+*.key
+*.pem
+secrets/
+credentials/
+
+# Android signing
+*.keystore
+*.jks
+keystore.properties
+
+# iOS signing
+*.p12
+*.mobileprovision
+
+# Real project artifacts that may leak data
+real-patch-notes/
+real-dev-notes/
+actual-diffs/
+internal-tc/
+
+# ========================================
+# OS / editor
+# ========================================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.iml
+
+# ========================================
+# Logs / temp
+# ========================================
+*.log
+*.tmp
+tmp/
+temp/
+.cache/
+
+# ========================================
+# Python (for any eval scripts)
+# ========================================
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# ========================================
+# Node (just in case)
+# ========================================
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# ========================================
+# Documentation that should NOT be public
+# ========================================
+PRIVATE.md
+DRAFT.md
+NOTES.local.md

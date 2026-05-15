@@ -1,0 +1,101 @@
+# CLAUDE.md (project-specific facts)
+
+> This is a **template**. Copy it to your project root as `CLAUDE.md` (without `.example`) and fill in the placeholders. The mobile-tc-harness skill will read it during TC generation to ground the output in your specific project.
+>
+> **Do not commit this file with real secrets.** Use only public, non-sensitive project facts.
+
+---
+
+## Project identity
+
+- **Name**: <YourProjectName>
+- **Type**: <Unity mobile app / native Android / React Native / etc.>
+- **Stage**: <new build / mature product / in maintenance>
+- **Team size**: <solo / small / medium / large>
+
+## Tech stack
+
+- **Engine**: Unity <version, e.g., 2022.3.20f1 LTS>
+- **Render pipeline**: <Built-in / URP / HDRP>
+- **Main async library**: <UniTask / Coroutines / .NET Task>
+- **DI / architecture**: <Zenject / VContainer / none>
+- **Data format**: <ScriptableObject / JSON / addressables>
+- **Networking**: <REST / gRPC / custom socket>
+- **Backend**: <internal name or generic description>
+
+## Android build
+
+- **Build command**: <e.g., `./build_android.sh` or `unity -batchmode -executeMethod BuildPipeline.BuildAndroid`>
+- **Output type**: <APK / AAB>
+- **Min SDK**: <e.g., 24>
+- **Target SDK**: <e.g., 34>
+- **Primary test device**: <model name>
+- **Low-end test device**: <model name — defines our "저사양" baseline>
+- **Required permissions in manifest**: <list relevant ones>
+
+## iOS build (if applicable)
+
+- **Build command**: <e.g., `./build_ios.sh`>
+- **Export method**: <development / ad-hoc / app-store>
+- **Signing assumptions**: <team ID, profile name, automated or manual>
+- **Primary test device**: <model name>
+- **iOS version range supported**: <e.g., iOS 15.0+>
+
+## Folder structure (top-level only)
+
+```
+<project-root>/
+├── Assets/
+│   ├── Scripts/              ← C# code
+│   ├── UI/                   ← prefabs, scenes
+│   ├── Data/                 ← ScriptableObjects, JSON
+│   └── ...
+├── ProjectSettings/
+└── ...
+```
+
+## QA policy
+
+- **Build Gates** (must pass before any release):
+  - <e.g., Android build + APK install + first-launch smoke>
+- **Smoke test path**: <one-paragraph description of "the critical user flow">
+- **Regression priorities**:
+  - P0 = <define: e.g., crash, data loss, payment failure>
+  - P1 = <define>
+  - P2 = <define>
+  - P3 = <define>
+- **TC tracking**: <Notion DB name / TestRail / spreadsheet / etc.>
+
+## Notion workspace (if using Notion MCP)
+
+- **Patch note page pattern**: <URL pattern or page naming convention — but DO NOT paste real URLs here, just the pattern>
+- **Developer note page pattern**: <same>
+- **TC database**: <name only, not URL>
+- **TC database property mapping** (so the skill knows your schema):
+  - TC ID → property "<your-name>"
+  - Platform → property "<your-name>"
+  - Type → property "<your-name>"
+  - Priority → property "<your-name>"
+  - Status → property "<your-name>"
+  - (etc.)
+
+## Conventions
+
+- **Test method naming**: <e.g., `should_<expectedBehavior>_when_<condition>`>
+- **Branch naming**: <e.g., `feature/<jira-id>-<desc>`, `fix/<id>`>
+- **Commit format**: <e.g., conventional commits, custom format, free-form>
+- **TC priority assignment rule**: <how you decide P0 vs P1 — write the rule down so the skill applies it consistently>
+
+## Known constraints / quirks
+
+- <Specific things the skill should be aware of — e.g., "always test on Wi-Fi AND LTE because our auth has different behavior", "season-end logic has a known race condition, always include a TC for it">
+
+---
+
+## What NOT to put in this file
+
+- Real account IDs, API keys, signing keys, keystore paths
+- Real Notion URLs / IDs
+- Customer names or PII
+- Internal-only URLs
+- Anything that wouldn't survive being read by an external auditor
