@@ -46,6 +46,15 @@ cases:
     should_trigger: true
     rationale: "Direct slash-command invocation (always triggers regardless of description)"
 
+  - id: slash-command-no-args
+    prompt: "/mobile-build-tc-from-diff"
+    should_trigger: true
+    rationale: |
+      Direct slash-command with no arguments. Should trigger and then engage the
+      Stage 1 step 0 interactive prompt (AskUserQuestion) for platform / commit-range /
+      notion-mode. v0.2.0 introduced this; pre-v0.2 the skill would have failed silently
+      or used hardcoded defaults.
+
   - id: notion-mentioned
     prompt: "Notion 패치노트 페이지랑 dev note 보고 TC 만들어줘"
     should_trigger: true

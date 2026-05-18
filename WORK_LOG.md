@@ -100,22 +100,47 @@ SKILL.md에만 3개 Edit. 어제 세션에서 "부분 해소"로 남았던 revie
 
 skill이 자기 자신을 설치할 수는 없으므로 1회 부트스트랩은 수동. bootstrap.ps1/sh로 그 1회를 한 줄로 단축. 이후 갱신도 같은 명령 재실행 — 사용자가 패치 받았을 때는 `git pull && .\bootstrap.ps1 -TargetProject ...` 두 줄로 끝.
 
-### 추가: CHANGELOG.md 도입 (이번 entry 마지막 commit)
+### 추가: CHANGELOG.md 도입
 
-외부 reader용 변경 이력. Keep a Changelog 형식, v0.1.0 / v0.1.1 / v0.2.0 / Unreleased 분리. tag는 아직 미생성 — push 후 별도 결정. README structure 다이어그램에도 CHANGELOG.md 추가.
+외부 reader용 변경 이력. Keep a Changelog 형식, v0.1.0 / v0.1.1 / v0.2.0 / Unreleased 분리. README structure 다이어그램에도 CHANGELOG.md 추가. commit `285d035`.
+
+### 추가: git tag 3개 (annotated, local)
+
+- `v0.1.0` → `0376a05` (Initial public template)
+- `v0.1.1` → `0dbe6e5` (Stabilization)
+- `v0.2.0` → `1b79aab` (Usability)
+
+push 시 별도 (`git push origin v0.1.0 v0.1.1 v0.2.0` 또는 `--follow-tags`). 회사 계정 sign-in 상태에서는 보류 — personal sign-in 시점에 일괄 처리.
+
+### 추가: eval 케이스 보강 (이번 entry 마지막 commit)
+
+v0.1.1 / v0.2.0 신규 동작을 functional-evals.yaml에 케이스로 박음:
+- **Case 6 interactive-arg-prompt**: 인자 없이 invoke 시 AskUserQuestion 호출 + notion-write 옵션 부재 검증
+- **Case 7 dev-note-only-tc**: dev-note만 있고 diff 미증거인 fix가 TC로 생성되되 Source/Risk에 "dev-note only, diff unverified" 마킹 검증
+- **Case 8 non-substantive-claim-not-flagged**: 릴리스 날짜/카피 변경 같은 비-substantive claim은 cross-source flag 안 됨 검증
+- **Case 9 source-risk-leak-prevention**: 출력에 env var / 절대경로 / 토큰 / 개인 이메일 / 내부 URL 패턴이 없는지 regex sweep
+
+기존 Case 1, 4 보강:
+- Case 1 small-bugfix: must_not_include에 "IOS-login" 추가 (cross-platform 아닌 변경은 iOS Prepared row 없어야 함)
+- Case 4 lifecycle-change: must_include에 "iOS Prepared" + "lifecycle-broad-regression" 추가
+
+trigger-evals.yaml에 1개 추가:
+- **slash-command-no-args**: 인자 없이 슬래시 명령 트리거 검증 (v0.2.0 interactive prompt로 연결됨)
 
 ### 잔여 후보 갱신
 
 - ~~Quick start 재작성~~ 완료
 - ~~bootstrap 스크립트~~ 완료
 - ~~인터랙티브 prompt~~ 완료
-- ~~CHANGELOG.md 작성~~ 완료 (이번 entry 마지막)
-- **eval 케이스 작성** (남음)
+- ~~CHANGELOG.md 작성~~ 완료
+- ~~git tag 생성 (local)~~ 완료, push 보류
+- ~~eval 케이스 보강~~ 완료 (이번 entry 마지막)
+- **eval 실제 실행** (남음, v0.1 manual eval — 사용자가 다운스트림 환경에서 수동 실행)
 - **다운스트림 적용 시도** (남음, 실제 프로젝트)
 - **xlsx/csv 출력 옵션** (신규 후보, v0.3 검토)
 - **프로젝트별 양식 분기** (신규 후보, v0.3 검토)
 - **self-update 메커니즘** (선택, frontmatter write 권한 영향 있음)
-- **git tag 생성 (v0.1.0 / v0.1.1 / v0.2.0)** (신규 후보, CHANGELOG 링크 활성화용)
+- **tag push** (push 가능 시점, `git push origin v0.1.0 v0.1.1 v0.2.0`)
 
 ---
 
@@ -130,14 +155,14 @@ skill이 자기 자신을 설치할 수는 없으므로 1회 부트스트랩은 
 
 아래는 우선순위 없는 후보. 새 세션에서 선택.
 
-- **eval 케이스 작성**: `.claude/skills/.../evals/{trigger,functional}-evals.yaml`은 골격만 있고 실제 케이스 미작성
+- **eval 실제 실행**: trigger/functional evals.yaml은 케이스가 채워짐. 다운스트림 환경에서 수동으로 case 별 실행 + pass/fail 기록 필요 (v0.1 manual eval 형식)
 - **다운스트림 적용 시도**: 실제 프로젝트에 bootstrap.ps1/sh로 설치해 동작 검증
-- **git tag 생성**: v0.1.0 / v0.1.1 / v0.2.0 tag 만들기 (CHANGELOG의 compare 링크 활성화용)
+- **tag push**: 로컬 v0.1.0 / v0.1.1 / v0.2.0 push 필요 (personal sign-in 시점에 `git push origin v0.1.0 v0.1.1 v0.2.0` 또는 `--follow-tags`)
 - **xlsx/csv 출력 옵션** (v0.3 검토): SKILL.md Stage 5에 새 모드 또는 외부 변환 스크립트
 - **프로젝트별 양식 분기** (v0.3 검토): web-build-tc-from-diff 같은 별도 skill 또는 SKILL.md에 `--format` 옵션
 - **self-update 메커니즘** (선택): skill이 patch-to-tc 원격과 자기 버전 비교 후 갱신 알림. frontmatter write 권한 필요 — 보안 영향 검토 필요
 
-(2026-05-18 마무리: 부분 해소 #1+#6 / v0.2 사용성 개선 / CHANGELOG.md 도입)
+(2026-05-18 마무리: 부분 해소 #1+#6 / v0.2 사용성 개선 / CHANGELOG.md 도입 / git tag 3개 local / eval 케이스 보강)
 
 ### 작업 방식 메모 (이 세션에서 효과적이었던 패턴)
 

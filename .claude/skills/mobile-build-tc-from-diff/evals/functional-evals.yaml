@@ -39,6 +39,8 @@ cases:
       - "iOS build successful"  # iOS prepared, not executed
       - "(iOS|Android)/(Android|iOS)"  # must not merge platforms
       - "<real Notion URL>"  # no leaked data
+      - "IOS-login"  # v0.1.1: a single-platform Android login fix should NOT produce an iOS Prepared row
+                    # (login form validation is not a cross-platform divergence axis)
     expected_tc_count_range: [3, 8]
 
   # ============================================================
@@ -121,6 +123,9 @@ cases:
       - "broad-regression"  # the risk flag
       - "camera"  # an example of "resume from intent" — common failure path
       - "deep background"  # extended background scenario
+      - "iOS Prepared"  # v0.1.1: lifecycle IS a cross-platform divergence axis,
+                        # so iOS Prepared rows must appear
+      - "lifecycle-broad-regression"  # iOS flag from tc-taxonomy.md
     must_not_include:
       - "only 1 TC"  # lifecycle is never single-TC
 
@@ -144,6 +149,121 @@ cases:
     must_not_include:
       - "TC IDs from AND-001 through AND-100"  # avoid mass generation
     expected_behavior: "Skill stops, asks user to narrow scope or batch into multiple invocations"
+
+  # ============================================================
+  # Case 6: Interactive argument prompt (v0.2.0)
+  # ============================================================
+  - id: interactive-arg-prompt
+    description: |
+      User invokes /mobile-build-tc-from-diff with no arguments.
+      Skill should NOT silently use defaults; it should ask the user
+      via AskUserQuestion for the missing platform / commit-range /
+      notion-mode before proceeding (Stage 1 step 0).
+    mock_inputs:
+      slash_command: "/mobile-build-tc-from-diff"
+      diff_summary: "(not yet collected — no commit range agreed)"
+      patch_note: "(not yet fetched — no Notion mode agreed)"
+      dev_note: "(not yet fetched)"
+    must_include:
+      - "AskUserQuestion"   # or any equivalent interactive question call
+      - "platform"          # asks about platform
+      - "commit"            # asks about commit range
+      - "Notion"            # asks about Notion mode
+    must_not_include:
+      - "AND-"              # no TC IDs emitted yet — must not generate before scope agreed
+      - "Cross-source flag" # no flags either
+      - "notion-write"      # interactive default never offers notion-write
+    expected_behavior: |
+      Skill engages AskUserQuestion (or equivalent) to gather missing arguments
+      before invoking collect_diff_context.sh. notion-write is intentionally
+      absent from the interactive options.
+
+  # ============================================================
+  # Case 7: dev-note-only TC (v0.1.1 anti-pattern distinction)
+  # ============================================================
+  - id: dev-note-only-tc
+    description: |
+      The dev note describes a server-side fix (e.g., idempotency key)
+      that has no direct client-side diff evidence. v0.1.1 ruled that
+      dev-note (higher-trust internal doc) entitles a TC, but the
+      Source/Risk column must mark it 'dev-note only, diff unverified'.
+    mock_inputs:
+      diff_summary: |
+        Modified Assets/Scripts/SeasonPass/RewardClaim.cs (-3, +8)
+        (No obvious idempotency-key change in the client; mostly logging.)
+      commit_messages:
+        - "fix(reward): improve duplicate-claim handling (server change paired)"
+      patch_note: "시즌 패스 보상 중복 지급 문제 수정"
+      dev_note: |
+        Server now enforces an idempotency key on RewardClaim.
+        Client surfaces server's duplicate-detected response as a user-visible toast.
+    must_include:
+      - "idempotency"           # the fix scenario
+      - "dev-note only"         # the Source/Risk tag
+      - "diff unverified"       # the explicit unverified marker
+    must_not_include:
+      - "Cross-source flag.*idempotency"  # NOT a flag — it's a TC (dev note is higher-trust)
+      - "patch-note only"        # not a patch-note-only claim
+
+  # ============================================================
+  # Case 8: Non-substantive claim should NOT be flagged (v0.1.1)
+  # ============================================================
+  - id: non-substantive-claim-not-flagged
+    description: |
+      Patch note contains a marketing/metadata claim (release date,
+      copy variation) that is not 'substantive' under v0.1.1's
+      Stage 4 step 2 definition. Skill should NOT cross-source-flag it.
+    mock_inputs:
+      diff_summary: |
+        Modified Assets/Scripts/Login/LoginValidator.cs (-2, +5)
+      commit_messages:
+        - "fix(login): treat whitespace-only password as empty"
+      patch_note: |
+        - 로그인 시 공백만 입력해도 통과되던 문제 수정
+        - 이번 업데이트는 5월 20일 오전 10시부터 순차 적용됩니다
+        - 일부 표현이 자연스러운 문장으로 수정되었습니다
+      dev_note: "LoginValidator now trims input before length check."
+    must_include:
+      - "whitespace"             # the substantive claim — should be in a TC
+    must_not_include:
+      - "Cross-source flag.*5월 20일"     # release-date claim — not substantive
+      - "Cross-source flag.*표현"          # copy-variation claim — not substantive
+      - "Cross-source flag.*자연스러운"    # copy-variation claim — not substantive
+
+  # ============================================================
+  # Case 9: Source/Risk leak prevention (v0.1.1 R3)
+  # ============================================================
+  - id: source-risk-leak-prevention
+    description: |
+      Generated output (especially the Source/Risk column) must never
+      contain env vars, absolute filesystem paths outside the repo,
+      API tokens, user identity, or internal URLs. v0.1.1 added the
+      explicit Must-not-include list to notion-output-schema.md.
+      This eval is a regex sweep over the produced Markdown.
+    mock_inputs:
+      diff_summary: |
+        Modified Assets/Scripts/Content/ContentLoader.cs (async refactor)
+      commit_messages:
+        - "refactor(content): switch to async loading"
+      patch_note: "콘텐츠 로딩 속도 향상"
+      dev_note: "Async load refactor; tested locally."
+    must_include:
+      - "ContentLoader.cs"   # legitimate path reference (inside repo)
+      - "Source/Risk"        # column populated
+    must_not_include:
+      - "[A-Z]:\\\\Users\\\\"       # Windows absolute path under Users — likely a leak
+      - "/home/[a-zA-Z0-9_-]+/"     # Unix absolute path under /home — likely a leak
+      - "\\$HOME"                    # env var reference
+      - "\\$USER"                    # env var reference
+      - "\\$env:"                    # PowerShell env var
+      - "sk-[A-Za-z0-9]{20,}"       # API token pattern (OpenAI-style)
+      - "ghp_[A-Za-z0-9]{20,}"      # GitHub personal token pattern
+      - "@gmail\\.com|@naver\\.com|@kakao\\.com|@daum\\.net"  # personal email patterns
+      - "internal\\.(corp|company)"  # internal-URL pattern (illustrative)
+    expected_behavior: |
+      The skill emits only repo-relative paths, commit hashes, Notion section
+      labels, and taxonomy risk categories in Source/Risk. No env var, no
+      absolute filesystem path outside the repo, no user identity, no token.
 
 # ============================================================
 # Notes for failures
