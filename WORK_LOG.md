@@ -100,17 +100,22 @@ SKILL.md에만 3개 Edit. 어제 세션에서 "부분 해소"로 남았던 revie
 
 skill이 자기 자신을 설치할 수는 없으므로 1회 부트스트랩은 수동. bootstrap.ps1/sh로 그 1회를 한 줄로 단축. 이후 갱신도 같은 명령 재실행 — 사용자가 패치 받았을 때는 `git pull && .\bootstrap.ps1 -TargetProject ...` 두 줄로 끝.
 
+### 추가: CHANGELOG.md 도입 (이번 entry 마지막 commit)
+
+외부 reader용 변경 이력. Keep a Changelog 형식, v0.1.0 / v0.1.1 / v0.2.0 / Unreleased 분리. tag는 아직 미생성 — push 후 별도 결정. README structure 다이어그램에도 CHANGELOG.md 추가.
+
 ### 잔여 후보 갱신
 
 - ~~Quick start 재작성~~ 완료
 - ~~bootstrap 스크립트~~ 완료
 - ~~인터랙티브 prompt~~ 완료
+- ~~CHANGELOG.md 작성~~ 완료 (이번 entry 마지막)
 - **eval 케이스 작성** (남음)
 - **다운스트림 적용 시도** (남음, 실제 프로젝트)
-- **CHANGELOG.md 작성** (남음)
 - **xlsx/csv 출력 옵션** (신규 후보, v0.3 검토)
 - **프로젝트별 양식 분기** (신규 후보, v0.3 검토)
 - **self-update 메커니즘** (선택, frontmatter write 권한 영향 있음)
+- **git tag 생성 (v0.1.0 / v0.1.1 / v0.2.0)** (신규 후보, CHANGELOG 링크 활성화용)
 
 ---
 
@@ -127,12 +132,12 @@ skill이 자기 자신을 설치할 수는 없으므로 1회 부트스트랩은 
 
 - **eval 케이스 작성**: `.claude/skills/.../evals/{trigger,functional}-evals.yaml`은 골격만 있고 실제 케이스 미작성
 - **다운스트림 적용 시도**: 실제 프로젝트에 bootstrap.ps1/sh로 설치해 동작 검증
-- **CHANGELOG.md 작성**: 외부 reader용 변경 이력 (현재는 git log + 이 파일이 대체)
+- **git tag 생성**: v0.1.0 / v0.1.1 / v0.2.0 tag 만들기 (CHANGELOG의 compare 링크 활성화용)
 - **xlsx/csv 출력 옵션** (v0.3 검토): SKILL.md Stage 5에 새 모드 또는 외부 변환 스크립트
 - **프로젝트별 양식 분기** (v0.3 검토): web-build-tc-from-diff 같은 별도 skill 또는 SKILL.md에 `--format` 옵션
 - **self-update 메커니즘** (선택): skill이 patch-to-tc 원격과 자기 버전 비교 후 갱신 알림. frontmatter write 권한 필요 — 보안 영향 검토 필요
 
-(2026-05-18 마무리: 부분 해소 #1+#6 / v0.2 사용성 개선 — bootstrap + 인터랙티브 prompt + Quick start rewrite)
+(2026-05-18 마무리: 부분 해소 #1+#6 / v0.2 사용성 개선 / CHANGELOG.md 도입)
 
 ### 작업 방식 메모 (이 세션에서 효과적이었던 패턴)
 

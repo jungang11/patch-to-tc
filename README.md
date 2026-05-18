@@ -91,6 +91,7 @@ mobile-tc-harness/
 ├── LICENSE                      ← MIT
 ├── AGENTS.md                    ← cross-agent working rules (Codex, future agents)
 ├── CLAUDE.md                    ← Claude Code's working rules for THIS repo
+├── CHANGELOG.md                 ← version-level change log (external readers)
 ├── WORK_LOG.md                  ← session work log (read first in a new session)
 ├── bootstrap.ps1                ← one-line install for Windows (PowerShell 7+)
 ├── bootstrap.sh                 ← one-line install for Unix (bash)
