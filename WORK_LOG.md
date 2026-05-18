@@ -76,6 +76,44 @@ SKILL.md에만 3개 Edit. 어제 세션에서 "부분 해소"로 남았던 revie
 
 ---
 
+## 2026-05-18 (이어서) — v0.2 사용성 개선
+
+### 의도
+
+다운스트림 사용자가 patch-to-tc를 자기 프로젝트에 통합하기 쉽게. 사용자가 그린 그림: clone → 한 줄 부트스트랩 → 인자 없이 슬래시 명령 → 인터랙티브 prompt → TC 생성.
+
+### 신규 commit 3개
+
+| Hash | 의도 | 파일 |
+|---|---|---|
+| `9929c57` | tools: bootstrap scripts | bootstrap.ps1, bootstrap.sh (신규) |
+| `9beba80` | skill: interactive argument prompt | SKILL.md Stage 1 step 0 추가 |
+| (이번) | docs: Quick start rewrite | README.md (Quick start + structure) + WORK_LOG.md |
+
+### 처리 내역
+
+- **bootstrap.ps1 / bootstrap.sh** — SHA-256 비교 기반 skill 복사/갱신 스크립트. 양쪽 동일 동작. `-Force` / `--force`, `-WhatIf` / `--dry-run` 옵션. 타겟이 patch-to-tc 자체면 거부 / git repo 아니면 경고.
+- **SKILL.md Stage 1 step 0** — 인자 미지정 시 `AskUserQuestion`으로 사용자 의도 묻기. `notion-write`는 인터랙티브 옵션에 포함 안 함 (안전).
+- **README.md Quick start** — 4가지 설치 방식 비교표 (bootstrap / symlink / submodule / user skill) + 부트스트랩 가이드 + 인터랙티브 invoke 안내 + 업데이트 방법. Repository structure에 bootstrap.* 추가.
+
+### chicken-and-egg 한계 (해결 안 됨, 설계상)
+
+skill이 자기 자신을 설치할 수는 없으므로 1회 부트스트랩은 수동. bootstrap.ps1/sh로 그 1회를 한 줄로 단축. 이후 갱신도 같은 명령 재실행 — 사용자가 패치 받았을 때는 `git pull && .\bootstrap.ps1 -TargetProject ...` 두 줄로 끝.
+
+### 잔여 후보 갱신
+
+- ~~Quick start 재작성~~ 완료
+- ~~bootstrap 스크립트~~ 완료
+- ~~인터랙티브 prompt~~ 완료
+- **eval 케이스 작성** (남음)
+- **다운스트림 적용 시도** (남음, 실제 프로젝트)
+- **CHANGELOG.md 작성** (남음)
+- **xlsx/csv 출력 옵션** (신규 후보, v0.3 검토)
+- **프로젝트별 양식 분기** (신규 후보, v0.3 검토)
+- **self-update 메커니즘** (선택, frontmatter write 권한 영향 있음)
+
+---
+
 ## 새 세션을 시작할 때
 
 1. **이 파일을 먼저 읽기** (위 표가 컨텍스트 전부)
@@ -88,10 +126,13 @@ SKILL.md에만 3개 Edit. 어제 세션에서 "부분 해소"로 남았던 revie
 아래는 우선순위 없는 후보. 새 세션에서 선택.
 
 - **eval 케이스 작성**: `.claude/skills/.../evals/{trigger,functional}-evals.yaml`은 골격만 있고 실제 케이스 미작성
-- **다운스트림 적용 시도**: 실제 회사 프로젝트에 `.claude/skills/mobile-build-tc-from-diff/`를 적용해 동작 검증
+- **다운스트림 적용 시도**: 실제 프로젝트에 bootstrap.ps1/sh로 설치해 동작 검증
 - **CHANGELOG.md 작성**: 외부 reader용 변경 이력 (현재는 git log + 이 파일이 대체)
+- **xlsx/csv 출력 옵션** (v0.3 검토): SKILL.md Stage 5에 새 모드 또는 외부 변환 스크립트
+- **프로젝트별 양식 분기** (v0.3 검토): web-build-tc-from-diff 같은 별도 skill 또는 SKILL.md에 `--format` 옵션
+- **self-update 메커니즘** (선택): skill이 patch-to-tc 원격과 자기 버전 비교 후 갱신 알림. frontmatter write 권한 필요 — 보안 영향 검토 필요
 
-(2026-05-18 부분 해소 #1+#6은 마무리됨)
+(2026-05-18 마무리: 부분 해소 #1+#6 / v0.2 사용성 개선 — bootstrap + 인터랙티브 prompt + Quick start rewrite)
 
 ### 작업 방식 메모 (이 세션에서 효과적이었던 패턴)
 

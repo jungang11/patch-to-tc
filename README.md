@@ -28,12 +28,58 @@ This repo is a worked example of that idea, applied to a concrete problem: turni
 
 ## Quick start
 
-1. Clone this repo into a fresh directory (do **not** copy it on top of your existing project until you've read the customization guide).
-2. Open it with Claude Code (`claude` in the directory).
-3. Read `CLAUDE.md` and `docs/REFERENCES.md` to understand the design.
-4. Copy `.claude/CLAUDE.md.example` to `.claude/CLAUDE.md` in your real project and fill in the placeholders (Unity version, build commands, target devices, etc.).
-5. Copy `.claude/skills/mobile-build-tc-from-diff/` into your real project's `.claude/skills/`.
-6. In your project, invoke the skill with `/mobile-build-tc-from-diff android HEAD~1..HEAD`.
+### 1. Get the template
+
+```bash
+git clone https://github.com/jungang11/patch-to-tc.git
+cd patch-to-tc
+```
+
+### 2. Install the skill into your project
+
+Pick one of four methods:
+
+| Method | Command | When to use |
+|---|---|---|
+| **A. Bootstrap script** (recommended) | Windows: `.\bootstrap.ps1 -TargetProject <path>`<br>Unix: `./bootstrap.sh <path>` | Most users. Re-runnable — SHA-256 hash compare skips unchanged files. Supports `--force` and `--dry-run` (`-WhatIf` on PowerShell). |
+| **B. Symlink** | Windows (admin): `New-Item -ItemType SymbolicLink -Path <project>\.claude\skills\mobile-build-tc-from-diff -Target <patch-to-tc>\.claude\skills\mobile-build-tc-from-diff`<br>Unix: `ln -s <patch-to-tc>/.claude/skills/mobile-build-tc-from-diff <project>/.claude/skills/mobile-build-tc-from-diff` | When updates should flow automatically without re-running bootstrap. |
+| **C. Git submodule** | `git submodule add <patch-to-tc-url> .claude/skills/mobile-build-tc-from-diff` | When you need a pinned skill version per project. |
+| **D. User skill (global)** | Copy or symlink the skill directory to `~/.claude/skills/mobile-build-tc-from-diff/` | When you want one install shared across all projects on your machine. |
+
+### 3. Customize your project's CLAUDE.md (one time)
+
+Copy `.claude/CLAUDE.md.example` to your project's `.claude/CLAUDE.md` and fill in the placeholders (Unity version, build commands, target devices, QA policy, etc.). The example file is the contract — the skill reads project-specific facts from `CLAUDE.md` at runtime.
+
+### 4. Invoke the skill
+
+```
+cd <your-project>
+claude
+> /mobile-build-tc-from-diff
+```
+
+Run with **no arguments** and the skill prompts interactively for missing values:
+- 어느 플랫폼 (`android` / `both` / `ios`)
+- Commit 범위 (`HEAD~1..HEAD`, `HEAD~3..HEAD`, 또는 직접 입력)
+- Notion 모드 (`notion-read` / `notion-draft` / 사용 안 함)
+
+Or invoke with explicit arguments:
+
+```
+> /mobile-build-tc-from-diff android HEAD~3..HEAD
+> /mobile-build-tc-from-diff both v2.3.0..HEAD notion-read
+```
+
+### 5. Updating later
+
+```bash
+cd patch-to-tc
+git pull
+.\bootstrap.ps1 -TargetProject <your-project>    # PowerShell
+./bootstrap.sh <your-project>                    # bash
+```
+
+Re-running `bootstrap` is safe — unchanged files are skipped via SHA-256 hash compare.
 
 ---
 
@@ -46,6 +92,8 @@ mobile-tc-harness/
 ├── AGENTS.md                    ← cross-agent working rules (Codex, future agents)
 ├── CLAUDE.md                    ← Claude Code's working rules for THIS repo
 ├── WORK_LOG.md                  ← session work log (read first in a new session)
+├── bootstrap.ps1                ← one-line install for Windows (PowerShell 7+)
+├── bootstrap.sh                 ← one-line install for Unix (bash)
 ├── .gitignore
 ├── docs/
 │   ├── REFERENCES.md            ← reference repos to read before designing
