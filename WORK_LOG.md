@@ -144,6 +144,34 @@ trigger-evals.yaml에 1개 추가:
 
 ---
 
+## 2026-05-18 (저녁) — v0.3 디자인 토론
+
+`docs/v0.3-design.md` 신규 작성. 3개 후보 (xlsx/csv 출력 / 프로젝트별 양식 분기 / self-update)의 trade-off 정리.
+
+### 결론
+
+| 항목 | 결정 | 타겟 |
+|---|---|---|
+| xlsx/csv 출력 | Option B (외부 변환 스크립트) 권장, 단 다운스트림 수요 확인 후 | v0.4 |
+| 양식 분기 | Option B (도메인별 별도 skill) 권장, 단 비-mobile 수요 발생 후 | v0.4+ |
+| self-update | Option A (수동 유지) 채택, README 한 줄 추가 | v0.2.x patch |
+
+### v0.3.0 scope 재정의
+
+신규 큰 기능 없는 **maintenance release**:
+- 다운스트림 적용 시도 + eval 실제 실행 결과를 v0.3에 반영
+- README에 self-update 안내 한 줄 추가 (v0.2.x patch 가능)
+
+### Self-update 거부 이유
+
+option B/C는 frontmatter에 `WebFetch` 또는 `Bash(curl)` 권한 추가가 필요. v0.1.1 보안 보강에서 `allowed-tools`를 minimum-required로 축소했는데, version-toast UX를 위해 다시 확대하는 것은 보안 자세 후퇴.
+
+### Reassessment triggers (재논의 트리거)
+
+`docs/v0.3-design.md` 끝부분 참조 — CSV/xlsx 수요 확정 / 비-mobile 적용 요청 / 보안 보강 필요 사건 / Claude Code base-specialization 패턴 공식 지원 중 하나가 발생하면 본 결정 재검토.
+
+---
+
 ## 새 세션을 시작할 때
 
 1. **이 파일을 먼저 읽기** (위 표가 컨텍스트 전부)
@@ -158,11 +186,12 @@ trigger-evals.yaml에 1개 추가:
 - **eval 실제 실행**: trigger/functional evals.yaml은 케이스가 채워짐. 다운스트림 환경에서 수동으로 case 별 실행 + pass/fail 기록 필요 (v0.1 manual eval 형식)
 - **다운스트림 적용 시도**: 실제 프로젝트에 bootstrap.ps1/sh로 설치해 동작 검증
 - **tag push**: 로컬 v0.1.0 / v0.1.1 / v0.2.0 push 필요 (personal sign-in 시점에 `git push origin v0.1.0 v0.1.1 v0.2.0` 또는 `--follow-tags`)
-- **xlsx/csv 출력 옵션** (v0.3 검토): SKILL.md Stage 5에 새 모드 또는 외부 변환 스크립트
-- **프로젝트별 양식 분기** (v0.3 검토): web-build-tc-from-diff 같은 별도 skill 또는 SKILL.md에 `--format` 옵션
-- **self-update 메커니즘** (선택): skill이 patch-to-tc 원격과 자기 버전 비교 후 갱신 알림. frontmatter write 권한 필요 — 보안 영향 검토 필요
+- **README self-update 안내 한 줄 추가** (v0.2.x patch, 짧음): v0.3 design.md Option A 결정에 따른 후속
+- xlsx/csv 출력 옵션 → v0.3-design.md Option B 권장, v0.4 이연 (수요 확인 후)
+- 양식 분기 → v0.3-design.md Option B 권장, v0.4+ 이연 (비-mobile 수요 후)
+- self-update 메커니즘 → v0.3-design.md Option A 채택 (frontmatter 권한 확대 비용 회피), 별도 구현 없음
 
-(2026-05-18 마무리: 부분 해소 #1+#6 / v0.2 사용성 개선 / CHANGELOG.md 도입 / git tag 3개 local / eval 케이스 보강)
+(2026-05-18 마무리: 부분 해소 #1+#6 / v0.2 사용성 개선 / CHANGELOG.md 도입 / git tag 3개 local / eval 케이스 보강 / v0.3 디자인 토론)
 
 ### 작업 방식 메모 (이 세션에서 효과적이었던 패턴)
 

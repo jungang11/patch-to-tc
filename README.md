@@ -102,7 +102,8 @@ mobile-tc-harness/
 │   ├── android-tc-guidelines.md
 │   ├── ios-prepared-guidelines.md
 │   ├── notion-mcp-safety.md
-│   └── eval-strategy.md
+│   ├── eval-strategy.md
+│   └── v0.3-design.md           ← v0.3 design notes (deferred features)
 └── .claude/
     ├── CLAUDE.md.example        ← template for downstream projects
     └── skills/
