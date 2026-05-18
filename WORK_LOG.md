@@ -186,7 +186,7 @@ option B/C는 frontmatter에 `WebFetch` 또는 `Bash(curl)` 권한 추가가 필
 - **eval 실제 실행**: trigger/functional evals.yaml은 케이스가 채워짐. 다운스트림 환경에서 수동으로 case 별 실행 + pass/fail 기록 필요 (v0.1 manual eval 형식)
 - **다운스트림 적용 시도**: 실제 프로젝트에 bootstrap.ps1/sh로 설치해 동작 검증
 - **tag push**: 로컬 v0.1.0 / v0.1.1 / v0.2.0 push 필요 (personal sign-in 시점에 `git push origin v0.1.0 v0.1.1 v0.2.0` 또는 `--follow-tags`)
-- **README self-update 안내 한 줄 추가** (v0.2.x patch, 짧음): v0.3 design.md Option A 결정에 따른 후속
+- ~~README self-update 안내~~ 완료 (이번 entry 직전 commit, Quick start §5 끝에 추가)
 - xlsx/csv 출력 옵션 → v0.3-design.md Option B 권장, v0.4 이연 (수요 확인 후)
 - 양식 분기 → v0.3-design.md Option B 권장, v0.4+ 이연 (비-mobile 수요 후)
 - self-update 메커니즘 → v0.3-design.md Option A 채택 (frontmatter 권한 확대 비용 회피), 별도 구현 없음

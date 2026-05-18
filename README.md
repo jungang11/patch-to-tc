@@ -81,6 +81,8 @@ git pull
 
 Re-running `bootstrap` is safe — unchanged files are skipped via SHA-256 hash compare.
 
+> **No automatic update notification.** The skill does not check the remote for new versions on its own — adding that capability would require an external-fetch permission in the SKILL.md frontmatter, which the v0.1.1 security review explicitly tightened. Set a calendar reminder (monthly is reasonable) or re-run these commands whenever you start a major task that uses the skill. See `docs/v0.3-design.md` §3 for the rationale.
+
 ---
 
 ## Repository structure
