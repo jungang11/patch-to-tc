@@ -117,6 +117,8 @@ The skill produces a Markdown document with the following sections (see `example
 1. **Summary** — total TCs, breakdown by platform / priority, cross-source flag count, scoping decisions if any.
 2. **Android TCs** — table with columns: `TC ID | Type | Priority | Title | Preconditions | Steps | Expected Result | Automation Candidate | Source/Risk`.
 3. **iOS Prepared TCs** — same columns plus `Status: Prepared — not run`. iOS rows include relevant risk flags (e.g., `cross-platform-path-divergence`).
+
+   The `Status` column here is a **category marker** (i.e., "this row is a prepared iOS TC, not yet executed in this build cycle"), not a progress tracker. Per-execution progress — pass / fail / blocked — should live in a **separate progress checklist** kept distinct from the TC definition tables (some downstream projects append one at the end of the file with `[ ]` / `[v]` / `[x]` / `[!]` / `[-]` status markers). The main TC tables stay immutable as a record of "what should be tested"; the optional checklist records "what was actually tested when". Android tables therefore do not carry a `Status` column either — Android execution state, when tracked, goes in the same separate checklist, not in the definition table.
 4. **Cross-source flags** — table from Stage 4: `Claim | Source | Supporting evidence | Suggested action`.
 5. **Notes for human reviewer** — anything the reviewer should know before running these TCs: environment assumptions, known gaps, decisions made under uncertainty.
 
@@ -127,7 +129,9 @@ These are observed failure modes. The skill must avoid all of them.
 - **Mass generation.** Generating 50+ TCs without scoping. The cap is 30; if more is warranted, ask the user to batch.
 - **Compound steps.** "Login AND verify dashboard AND tap settings" is three TCs, not one.
 - **Vague expected results.** "Works correctly" or "No error" is not an expected result. Each step must have an observable, specific assertion.
+- **Internal implementation detail in Expected Result.** The Expected Result is what a **QA tester observes** — UI state, audio output, error message text, Logcat keyword matches, on-screen values. Engine-side detail (ONNX file names, internal method names, library versions, frame buffer formats) belongs in **Steps** (so the tester knows what to set up) or **Notes** (so the reviewer knows the context). Writing "text_encoder/latent_denoiser/voice_decoder ONNX 로드 후 한국어 음성 출력" mixes a developer-visible internal and a QA-observable outcome — split it: Steps mentions the three ONNX files (the setup), Expected Result is "한국어 음성이 인트로 종료 후 1초 이내 재생, 끊김 없음 (Logcat에 `Supertonic2TTSRunner: synthesis complete` 출력)".
 - **Empty Source/Risk.** Every TC traces back to git files + commit + risk category. A blank Source/Risk means the TC has no auditable origin and must be dropped.
+- **Mismatched Automation Candidate column and Notes.** If the Notes section says "X can be automated immediately" (e.g., "RenjuRule unit tests are immediate automation candidates"), the Automation Candidate column for those TCs must reflect that — not say "Manual". The column and the Notes are two surfaces of the same decision; if they disagree, the TC author hasn't decided. Pick one and update both.
 - **Generic edge-case rows that don't apply.** Don't include a "low memory device" TC unless the changed code actually has memory implications.
 - **Dev-note-over-diff or diff-over-dev-note.** Both are sources. Disagreements go to Stage 4, not to a silent choice.
 - **Notion write without schema confirmation.** Always run the schema-mapping protocol. Skipping it is the most common way to corrupt a downstream database.

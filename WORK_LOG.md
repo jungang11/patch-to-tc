@@ -239,6 +239,36 @@ bomphago 세션은 사용자가 "Docs/QA/에 파일로 만들어줘"라고 이�
 
 ---
 
+## 2026-05-18 (밤 이어서) — 외부 review (Claude Web) 반영 patch (A/B/D)
+
+사용자가 Claude Web (사전 지식 없이 문서만 본 상태)에서 bomphago TC 파일에 대한 평가를 받아옴. 5개 지적 중 4개가 skill 본체와 연결됨. 우선순위 (A > B > D > C)로 정리.
+
+### 진행 결정
+
+| # | 지적 | 결정 |
+|---|---|---|
+| A | Expected Result 톤이 개발자 vs QA 혼재 (ONNX 같은 내부 구현 디테일이 expected에 들어감) | **반영** (anti-pattern 1줄, 안전) |
+| B | Automation Candidate 컬럼 vs Notes 모순 | **반영** (anti-pattern 1줄, 안전) |
+| D | Status 컬럼이 카테고리인지 진행인지 불명확 | **반영** (Stage 5 §3에 design intention 명시) |
+| C | Cross-source flag에 Owner 컬럼 추가 | **보류** — owner 정의(commit author / QA lead / PM / unassigned) 디자인 결정 필요. 최소-안전 수정 원칙에 따라 별도 결정으로 미룸. |
+
+### 신규 commit (이번 entry 마지막)
+
+- SKILL.md anti-patterns 2개 추가 (A, B)
+- SKILL.md Output format §3 iOS Prepared 설명 보강 (D)
+- CHANGELOG Unreleased "Added" 3 줄 추가
+- WORK_LOG 이번 entry
+
+### 외부 review의 가치
+
+웹 클로드 평가는 reviewer simulation과 결이 같음 — "사전 지식 없이 문서만 본 상태". 이번 세션 초반 셀프 시뮬에서 안 잡혔던 새 발견 3건 (A, B, D 영역). 외부 review가 셀프 시뮬을 보완하는 패턴 확인.
+
+### bomphago 자동 갱신 안 됨
+
+이번 patch가 적용되어도 bomphago의 `.claude/skills/mobile-build-tc-from-diff/`는 자동 갱신 X. 사용자가 patch-to-tc 디렉토리에서 `.\bootstrap.ps1 -TargetProject "E:\Unity_Research\bomphago_Unity6"` 재실행 시 SHA-256 비교로 변경된 SKILL.md만 복사. 현재 빌드 검증 진행 중인 세션에는 영향 없음 (메모리에 이미 로드된 SKILL.md 사용). 다음 TC 생성 invocation부터 새 anti-pattern 적용.
+
+---
+
 ## 새 세션을 시작할 때
 
 1. **이 파일을 먼저 읽기** (위 표가 컨텍스트 전부)

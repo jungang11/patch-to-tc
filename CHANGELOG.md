@@ -17,6 +17,9 @@ For session-level internal notes, see `WORK_LOG.md`.
 - `.claude/CLAUDE.md.example` QA policy section: new `TC output directory` field (default `Docs/QA/` if absent or left as placeholder).
 - New SKILL.md anti-pattern: "Dumping the full TC tables into the chat instead of (or in addition to) the file."
 - New SKILL.md anti-pattern: "Writing files outside the intended TC output directory."
+- New SKILL.md anti-pattern: "Internal implementation detail in Expected Result." Expected Result is for QA-observable outcomes; engine-side detail (ONNX file names, internal method names, library versions) belongs in Steps or Notes. From first downstream trial external review.
+- New SKILL.md anti-pattern: "Mismatched Automation Candidate column and Notes." If Notes says a TC is an automation candidate, the column must reflect that — same decision, two surfaces. From first downstream trial external review.
+- SKILL.md Output format §3 (iOS Prepared TCs): explicit clarification that the `Status: Prepared — not run` value is a **category marker**, not a progress tracker. Per-execution progress (pass/fail/blocked) belongs in a separate checklist, kept distinct from the immutable TC definition tables.
 - `bootstrap.ps1 -SetupClaudeMd` and `bootstrap.sh --setup-claude-md` options. When set, the bootstrap script also copies `.claude/CLAUDE.md.example` to the target's `.claude/CLAUDE.md`, but only if no `CLAUDE.md` exists there yet (existing files are never overwritten). Streamlines first-install onto a new downstream project.
 
 ### Changed
