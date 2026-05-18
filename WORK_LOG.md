@@ -56,6 +56,26 @@ Claude Code 세션은 로컬 머신 단위로 저장됨(`~/.claude/projects/...`
 
 ---
 
+## 2026-05-18 — 부분 해소 #1+#6 마무리
+
+### 신규 commit (이번 패치)
+
+SKILL.md에만 3개 Edit. 어제 세션에서 "부분 해소"로 남았던 reviewer 시뮬 막힘 #1, #6을 완전 해소.
+
+- **#1 마무리** — Inputs 섹션
+  - Platform argument와 출력 섹션 관계 명시: `android` = Android only (iOS Prepared section 미생성), `ios` = iOS Prepared only, `both` = 양쪽 with Stage 3 step 3 cross-platform 필터.
+  - Notion mode 미지정 시 동작 명시: Stage 1/4/5 Notion 동작 모두 bypass, Markdown only, Cross-source flags는 diff 내부 일관성 점검으로 축소.
+- **#6 마무리** — Stage 3 step 2
+  - Source/Risk 컬럼의 commit hash는 `collect_diff_context.sh` 출력의 "Commit messages (full, not truncated)" 섹션에서 `### <hash> — <subject>` 형식으로 추출.
+  - file 매핑은 "Changed files (full list)" 섹션의 `git diff --name-status`.
+  - 한 파일에 여러 commit이 걸치면 콤마로 나열.
+
+### 결과
+
+9개 reviewer 시뮬 막힘 전부 해소 (부분 해소 0건, 완전 해소 9건).
+
+---
+
 ## 새 세션을 시작할 때
 
 1. **이 파일을 먼저 읽기** (위 표가 컨텍스트 전부)
@@ -67,11 +87,11 @@ Claude Code 세션은 로컬 머신 단위로 저장됨(`~/.claude/projects/...`
 
 아래는 우선순위 없는 후보. 새 세션에서 선택.
 
-- **부분 해소 #1 마무리**: SKILL.md Inputs에 "Notion mode 미지정 시 동작" + "platform argument와 iOS Prepared 활성화 관계" 한 줄
-- **부분 해소 #6 마무리**: SKILL.md Stage 3 step 2에 "commit hash는 `git log --format=%h`로 추출, `git log --name-only`로 file 매핑" 명시
 - **eval 케이스 작성**: `.claude/skills/.../evals/{trigger,functional}-evals.yaml`은 골격만 있고 실제 케이스 미작성
 - **다운스트림 적용 시도**: 실제 회사 프로젝트에 `.claude/skills/mobile-build-tc-from-diff/`를 적용해 동작 검증
 - **CHANGELOG.md 작성**: 외부 reader용 변경 이력 (현재는 git log + 이 파일이 대체)
+
+(2026-05-18 부분 해소 #1+#6은 마무리됨)
 
 ### 작업 방식 메모 (이 세션에서 효과적이었던 패턴)
 

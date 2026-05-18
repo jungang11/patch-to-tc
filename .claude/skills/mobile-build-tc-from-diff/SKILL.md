@@ -24,9 +24,9 @@ Do NOT activate for:
 
 ## Inputs
 
-1. **Platform** (required) — Argument 1: `android`, `ios`, or `both` (default: `android`).
+1. **Platform** (required) — Argument 1: `android`, `ios`, or `both` (default: `android`). Controls which sections appear in the output: `android` produces Android executable TCs only (no iOS Prepared section, even if cross-platform flags are present); `ios` produces only the iOS Prepared section; `both` produces both, with iOS Prepared rows filtered by the cross-platform divergence axes defined in Stage 3 step 3.
 2. **Commit range** (required) — Argument 2, e.g., `HEAD~1..HEAD` or `v2.3.0..HEAD`.
-3. **Notion mode** (optional) — Argument 3: `notion-read` (pull patch + dev notes as context), `notion-draft` (write TCs as Draft rows after read), or `notion-write` (write as final; requires explicit user confirmation each time).
+3. **Notion mode** (optional) — Argument 3: `notion-read` (pull patch + dev notes as context), `notion-draft` (write TCs as Draft rows after read), or `notion-write` (write as final; requires explicit user confirmation each time). When omitted, the skill skips all Notion operations — Stage 1's Notion fetch, Stage 4's cross-source verification against Notion claims, and Stage 5's Notion write are all bypassed; the output is Markdown only and Cross-source flags reduce to internal consistency checks within the diff alone.
 
 ## Workflow
 
@@ -53,6 +53,7 @@ The skill runs five sequential stages with explicit confirmation gates at the en
    - Have **exactly one validation purpose per TC**. Compound steps ("Login AND verify dashboard AND tap settings") split into separate TCs.
    - Include every required field: `TC ID | Type | Priority | Title | Preconditions | Steps | Expected Result | Automation Candidate | Source/Risk`. Test data, when needed, lives inline in `Preconditions` or `Steps` — not as a separate column.
    - Use generic placeholder data (`AND-login-001`, `ExampleApp`). Never reference real company names, real account IDs, real Notion URLs, real version numbers.
+   - For the **Source/Risk** column: extract commit hashes from the `Commit messages (full, not truncated)` section of `collect_diff_context.sh` output (each entry begins with `### <hash> — <subject>`); take per-file mapping from the `Changed files (full list)` section (`git diff --name-status`). When multiple commits touch the same file, list them comma-separated.
 3. **Android executable TCs and iOS Prepared TCs go in separate sections — never one combined row.** Generate an iOS Prepared row only when the change involves at least one **explicit cross-platform divergence axis**: path resolution (`Application.persistentDataPath`, sandbox layout), lifecycle/suspend semantics, safe-area / device-form-factor layout, iOS-specific capability or permission model (`UNUserNotificationCenter`, ATS, entitlements), or platform-specific timing/memory characteristics. Android-only signals (Android version splits, OEM behavior, server-side handling on the Android client) do **not** produce iOS Prepared rows. Refer to `references/tc-taxonomy.md` "iOS Prepared flags" fields for the authoritative per-category list. iOS Prepared rows carry `Status: Prepared — not run` and the relevant iOS risk flags.
 4. Apply pairwise reduction (per `references/pairwise-strategy.md`) only when a single change crosses ≥ 3 axes with ≥ 2 values each. Build Gate and Smoke TCs are never pairwise-reduced.
 5. Hard cap: 30 TCs per invocation. If generation would exceed 30, **pause before emitting any TCs** and ask the user to scope or batch (do not render a partial Markdown document at this point — scope agreement must precede full output). After the user agrees to a scope, resume generation and proceed to Stage 4 / Stage 5 normally.
