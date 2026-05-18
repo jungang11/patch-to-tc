@@ -172,6 +172,28 @@ option B/C는 frontmatter에 `WebFetch` 또는 `Bash(curl)` 권한 추가가 필
 
 ---
 
+## 2026-05-18 (저녁 이어서) — 회사 프로젝트 적용 준비 patch
+
+오늘 사용자가 patch-to-tc를 실제 회사 프로젝트 여러 개에 적용해서 변경점에 대한 TC 뽑아 빌드테스트할 예정. 그 적용을 매끄럽게 만드는 patch.
+
+### 신규 commit
+
+- `55cea7b` docs: README self-update 안내 (v0.3-design.md Option A 후속)
+- (이번 entry 마지막) bootstrap `-SetupClaudeMd` / `--setup-claude-md` 옵션 + README §3 갱신 + CHANGELOG Unreleased 갱신
+
+### bootstrap 신규 옵션
+
+- `-SetupClaudeMd` (PowerShell) / `--setup-claude-md` (bash)
+- 동작: 타겟에 `.claude/CLAUDE.md`가 없을 때만 patch-to-tc의 `.claude/CLAUDE.md.example`을 복사. 이미 있으면 절대 덮어쓰지 않음.
+- 적용 흐름: 회사 프로젝트마다 `.\bootstrap.ps1 -TargetProject <path> -SetupClaudeMd` 한 번으로 skill + CLAUDE.md 템플릿 동시 배치 → 사용자가 CLAUDE.md placeholder만 채우면 됨.
+
+### 다음 단계
+
+- 사용자가 실제 회사 프로젝트에 bootstrap 실행 → CLAUDE.md placeholder 채움 → `/mobile-build-tc-from-diff` invoke
+- 적용 중 발견된 이슈는 이 세션으로 보고 → 즉시 patch
+
+---
+
 ## 새 세션을 시작할 때
 
 1. **이 파일을 먼저 읽기** (위 표가 컨텍스트 전부)

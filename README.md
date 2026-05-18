@@ -48,7 +48,29 @@ Pick one of four methods:
 
 ### 3. Customize your project's CLAUDE.md (one time)
 
-Copy `.claude/CLAUDE.md.example` to your project's `.claude/CLAUDE.md` and fill in the placeholders (Unity version, build commands, target devices, QA policy, etc.). The example file is the contract — the skill reads project-specific facts from `CLAUDE.md` at runtime.
+The skill reads project-specific facts (Unity version, build command, target devices, QA policy, etc.) from your project's `.claude/CLAUDE.md`.
+
+**Easiest path** — re-run bootstrap with the setup flag:
+
+```powershell
+.\bootstrap.ps1 -TargetProject <path> -SetupClaudeMd
+```
+
+```bash
+./bootstrap.sh <path> --setup-claude-md
+```
+
+This copies `.claude/CLAUDE.md.example` to `<project>/.claude/CLAUDE.md` only if no `CLAUDE.md` exists there yet — your existing `CLAUDE.md` is never overwritten. After the copy, open the file and replace `<placeholders>` with your project facts.
+
+**Manual alternative**:
+
+```powershell
+Copy-Item <patch-to-tc>\.claude\CLAUDE.md.example <project>\.claude\CLAUDE.md
+```
+
+```bash
+cp <patch-to-tc>/.claude/CLAUDE.md.example <project>/.claude/CLAUDE.md
+```
 
 ### 4. Invoke the skill
 

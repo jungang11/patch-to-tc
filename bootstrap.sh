@@ -9,16 +9,20 @@
 # comparison is used to skip unchanged files. Safe to re-run.
 #
 # Usage:
-#   ./bootstrap.sh <target-project-path> [--force] [--dry-run]
+#   ./bootstrap.sh <target-project-path> [--force] [--dry-run] [--setup-claude-md]
 #
 # Options:
-#   --force     Skip confirmation prompts and overwrite without asking
-#   --dry-run   Show what would be done without making any changes
+#   --force            Skip confirmation prompts and overwrite without asking
+#   --dry-run          Show what would be done without making any changes
+#   --setup-claude-md  Also copy .claude/CLAUDE.md.example to the target's
+#                      .claude/CLAUDE.md, but only if no CLAUDE.md is already
+#                      there. Existing CLAUDE.md files are never overwritten.
 #
 # Examples:
 #   ./bootstrap.sh ~/projects/my-unity-project
 #   ./bootstrap.sh ~/projects/my-unity-project --dry-run
 #   ./bootstrap.sh ~/projects/my-unity-project --force
+#   ./bootstrap.sh ~/projects/my-unity-project --setup-claude-md
 
 set -euo pipefail
 
@@ -29,13 +33,15 @@ SOURCE_SKILL="$SCRIPT_DIR/.claude/skills/mobile-build-tc-from-diff"
 TARGET=""
 FORCE=0
 DRY_RUN=0
+SETUP_CLAUDE_MD=0
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --force) FORCE=1; shift ;;
         --dry-run) DRY_RUN=1; shift ;;
+        --setup-claude-md) SETUP_CLAUDE_MD=1; shift ;;
         --help|-h)
-            grep '^#' "$0" | sed 's/^# \{0,1\}//' | head -24
+            grep '^#' "$0" | sed 's/^# \{0,1\}//' | head -28
             exit 0
             ;;
         -*)
@@ -150,6 +156,30 @@ echo "Bootstrap complete:"
 echo "  - $COPIED new file(s)"
 echo "  - $UPDATED updated file(s)"
 echo "  - $SKIPPED unchanged file(s) skipped"
+
+# Optional: drop CLAUDE.md template if requested and not already present
+if [[ $SETUP_CLAUDE_MD -eq 1 ]]; then
+    SOURCE_CLAUDE_MD="$SCRIPT_DIR/.claude/CLAUDE.md.example"
+    TARGET_CLAUDE_DIR="$TARGET/.claude"
+    TARGET_CLAUDE_MD="$TARGET_CLAUDE_DIR/CLAUDE.md"
+
+    echo ""
+    if [[ ! -f "$SOURCE_CLAUDE_MD" ]]; then
+        echo "Warning: CLAUDE.md.example not found at $SOURCE_CLAUDE_MD - skipping CLAUDE.md setup" >&2
+    elif [[ -f "$TARGET_CLAUDE_MD" ]]; then
+        echo "CLAUDE.md already exists at $TARGET_CLAUDE_MD - not overwriting."
+    else
+        if [[ $DRY_RUN -eq 1 ]]; then
+            echo "[dry-run] would copy CLAUDE.md template to $TARGET_CLAUDE_MD"
+        else
+            mkdir -p "$TARGET_CLAUDE_DIR"
+            cp "$SOURCE_CLAUDE_MD" "$TARGET_CLAUDE_MD"
+            echo "Copied CLAUDE.md template to $TARGET_CLAUDE_MD"
+            echo "Open it in your editor and replace <placeholders> with your project facts."
+        fi
+    fi
+fi
+
 echo ""
 echo "Next step:"
 echo "  cd \"$TARGET\""

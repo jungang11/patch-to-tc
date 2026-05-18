@@ -11,12 +11,24 @@ For session-level internal notes, see `WORK_LOG.md`.
 
 ## [Unreleased]
 
-### Considered (not yet implemented)
-- xlsx / csv output option (Stage 5 extension or external converter script)
-- Project-format branching (separate skill per domain, or `--format` option)
-- Self-update mechanism (skill checks remote and prompts user on version mismatch; requires frontmatter write permission — security review needed)
-- Eval cases (`evals/{trigger,functional}-evals.yaml` are scaffolding only)
-- Downstream-adoption verification (real project trial with bootstrap script)
+### Added
+- `bootstrap.ps1 -SetupClaudeMd` and `bootstrap.sh --setup-claude-md` options. When set, the bootstrap script also copies `.claude/CLAUDE.md.example` to the target's `.claude/CLAUDE.md`, but only if no `CLAUDE.md` exists there yet (existing files are never overwritten). Streamlines first-install onto a new downstream project.
+
+### Changed
+- README Quick start §3 (customize CLAUDE.md): now documents the `-SetupClaudeMd` / `--setup-claude-md` "easiest path" alongside the manual copy fallback.
+- README Quick start §5 (Updating later): explicit "no automatic update notification" note. The skill does not check the remote on its own — adding that would require an external-fetch permission, which the v0.1.1 security tightening explicitly avoided. See `docs/v0.3-design.md` §3.
+- `evals/{trigger,functional}-evals.yaml`: added coverage for v0.1.1/v0.2.0 behavior (interactive arg prompt, dev-note-only TC, non-substantive claim, Source/Risk leak prevention) and boosted existing cases (small-bugfix iOS-row absence, lifecycle iOS Prepared presence).
+- `docs/v0.3-design.md` (new): trade-off analysis for xlsx/csv output, project-format branching, and self-update. Decisions: xlsx/csv and format-branching deferred to v0.4 (Option B in both cases); self-update rejected to preserve v0.1.1 security tightening.
+
+### Considered (deferred or rejected — see docs/v0.3-design.md)
+- xlsx / csv output — Option B (external converter `scripts/md_to_csv.py`) preferred; deferred to v0.4 pending downstream demand.
+- Project-format branching — Option B (separate skill per domain) preferred; deferred until non-mobile demand emerges.
+- Self-update mechanism — rejected. Manual `git pull` + bootstrap re-run remains the only update path; README §5 documents this.
+
+### Open
+- Eval cases (cases now filled, but actual execution against real projects still pending — v0.1 manual eval format).
+- Downstream-adoption verification (real project trial with bootstrap script).
+- Tag push: local `v0.1.0` / `v0.1.1` / `v0.2.0` annotated tags are not yet pushed.
 
 ---
 

@@ -18,6 +18,12 @@
 .PARAMETER WhatIf
     Show what would be done without making any changes. (PowerShell built-in.)
 
+.PARAMETER SetupClaudeMd
+    If set, copies .claude/CLAUDE.md.example to <TargetProject>/.claude/CLAUDE.md
+    when no CLAUDE.md exists there. Existing CLAUDE.md files are never overwritten.
+    Use this on first install to get the customization template in place;
+    placeholders inside must be filled in manually afterward.
+
 .EXAMPLE
     .\bootstrap.ps1 -TargetProject E:\Personal\my-unity-project
 
@@ -26,6 +32,10 @@
 
 .EXAMPLE
     .\bootstrap.ps1 -TargetProject E:\Personal\my-unity-project -Force
+
+.EXAMPLE
+    .\bootstrap.ps1 -TargetProject E:\Personal\my-unity-project -SetupClaudeMd
+    # First install: copies the skill AND drops the CLAUDE.md template.
 #>
 
 [CmdletBinding(SupportsShouldProcess)]
@@ -33,7 +43,11 @@ param(
     [Parameter(Mandatory)]
     [string]$TargetProject,
 
-    [switch]$Force
+    [switch]$Force,
+
+    # When set, copies .claude/CLAUDE.md.example to <TargetProject>/.claude/CLAUDE.md
+    # only if no CLAUDE.md exists there yet. Existing CLAUDE.md is never overwritten.
+    [switch]$SetupClaudeMd
 )
 
 $ErrorActionPreference = 'Stop'
@@ -116,6 +130,34 @@ Write-Host "Bootstrap complete:" -ForegroundColor Green
 Write-Host "  - $copied new file(s)"
 Write-Host "  - $updated updated file(s)"
 Write-Host "  - $skipped unchanged file(s) skipped"
+
+# Optional: drop CLAUDE.md template if requested and not already present
+if ($SetupClaudeMd) {
+    $SourceClaudeMd = Join-Path $ScriptRoot '.claude\CLAUDE.md.example'
+    $TargetClaudeDir = Join-Path $TargetProject '.claude'
+    $TargetClaudeMd = Join-Path $TargetClaudeDir 'CLAUDE.md'
+
+    Write-Host ""
+    if (-not (Test-Path $SourceClaudeMd)) {
+        Write-Warning "CLAUDE.md.example not found at $SourceClaudeMd - skipping CLAUDE.md setup"
+    }
+    elseif (Test-Path $TargetClaudeMd) {
+        Write-Host "CLAUDE.md already exists at $TargetClaudeMd - not overwriting." -ForegroundColor Yellow
+    }
+    else {
+        if (-not (Test-Path $TargetClaudeDir)) {
+            if ($PSCmdlet.ShouldProcess($TargetClaudeDir, "Create .claude directory")) {
+                New-Item -ItemType Directory -Path $TargetClaudeDir -Force | Out-Null
+            }
+        }
+        if ($PSCmdlet.ShouldProcess($TargetClaudeMd, "Copy CLAUDE.md template")) {
+            Copy-Item -Path $SourceClaudeMd -Destination $TargetClaudeMd
+            Write-Host "Copied CLAUDE.md template to $TargetClaudeMd" -ForegroundColor Green
+            Write-Host "Open it in your editor and replace <placeholders> with your project facts." -ForegroundColor Yellow
+        }
+    }
+}
+
 Write-Host ""
 Write-Host "Next step:"
 Write-Host "  cd `"$TargetProject`""
