@@ -65,6 +65,7 @@
   - P2 = <define>
   - P3 = <define>
 - **TC tracking**: <Notion DB name / TestRail / spreadsheet / etc.>
+- **TC output directory**: <e.g., Docs/QA/ — relative to project root. The skill saves each invocation's TC Markdown here as `TC_<YYYY-MM-DD>_<range-tag>.md`. If this line is absent or left as the placeholder, the skill uses `Docs/QA/` as the default.>
 
 ## Notion workspace (if using Notion MCP)
 

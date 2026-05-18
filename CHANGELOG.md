@@ -12,6 +12,11 @@ For session-level internal notes, see `WORK_LOG.md`.
 ## [Unreleased]
 
 ### Added
+- **Stage 5 file output is now the default** (resolves the v0.2.0 design gap discovered during the first downstream trial). The skill saves the canonical Markdown to `<TC output directory>/TC_<YYYY-MM-DD>_<range-tag>.md` (default `Docs/QA/`) and echoes only a short summary + the file path to the chat. The previous behavior — full TC tables dumped into the conversation — burned conversation tokens and forced the user to hand-copy results into a file before they could be reused.
+- SKILL.md frontmatter: `Write` added to `allowed-tools` (required for file save). Scope is explicitly limited to TC output only — see Constraints and Anti-patterns sections.
+- `.claude/CLAUDE.md.example` QA policy section: new `TC output directory` field (default `Docs/QA/` if absent or left as placeholder).
+- New SKILL.md anti-pattern: "Dumping the full TC tables into the chat instead of (or in addition to) the file."
+- New SKILL.md anti-pattern: "Writing files outside the intended TC output directory."
 - `bootstrap.ps1 -SetupClaudeMd` and `bootstrap.sh --setup-claude-md` options. When set, the bootstrap script also copies `.claude/CLAUDE.md.example` to the target's `.claude/CLAUDE.md`, but only if no `CLAUDE.md` exists there yet (existing files are never overwritten). Streamlines first-install onto a new downstream project.
 
 ### Changed
@@ -21,7 +26,7 @@ For session-level internal notes, see `WORK_LOG.md`.
 - `docs/v0.3-design.md` (new): trade-off analysis for xlsx/csv output, project-format branching, and self-update. Decisions: xlsx/csv and format-branching deferred to v0.4 (Option B in both cases); self-update rejected to preserve v0.1.1 security tightening.
 
 ### Considered (deferred or rejected — see docs/v0.3-design.md)
-- xlsx / csv output — Option B (external converter `scripts/md_to_csv.py`) preferred; deferred to v0.4 pending downstream demand.
+- xlsx / csv output — Option B (external converter `scripts/md_to_csv.py`) preferred; deferred to v0.4 pending downstream demand. **Note**: the `.md` file-save part of this design has been split out and shipped now (see Added section above) — only the xlsx/csv conversion step is still deferred.
 - Project-format branching — Option B (separate skill per domain) preferred; deferred until non-mobile demand emerges.
 - Self-update mechanism — rejected. Manual `git pull` + bootstrap re-run remains the only update path; README §5 documents this.
 

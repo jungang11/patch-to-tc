@@ -194,6 +194,51 @@ option B/C는 frontmatter에 `WebFetch` 또는 `Bash(curl)` 권한 추가가 필
 
 ---
 
+## 2026-05-18 (밤) — 첫 다운스트림 trial 발견 issue patch
+
+bomphago_Unity6에 적용 후 첫 실행 결과: skill이 53 TC를 **채팅 안 markdown으로만 출력하고 파일로 저장하지 않음**. 사용자가 엑셀화 작업 위해 파일이 필요한데 매번 손으로 복사해야 하는 상태.
+
+### 원인 진단
+
+SKILL.md Stage 5 step 1 원문이 "Always render the full Markdown document first ... The Markdown is the canonical output; Notion write is a downstream copy."였음 — "render"가 어디인지 명시 안 됨 → 모델은 자연스럽게 "현재 conversation"으로 해석. **skill의 design gap**. bomphago 세션은 SKILL.md 그대로 따랐을 뿐.
+
+더 안 좋은 점: `docs/v0.3-design.md` §1에서 이 문제(파일 저장)를 xlsx/csv 변환과 묶어서 "v0.4 이연" 결정했었음. 둘은 다른 작업이었는데 묶여서 미뤄짐. **디자인 결정 실수**.
+
+### 패치 내용 (이번 entry 마지막 commit)
+
+| Edit # | 파일 | 변경 |
+|---|---|---|
+| 1 | SKILL.md frontmatter | `allowed-tools`에 `Write` 추가 |
+| 2 | SKILL.md Stage 5 step 1 | 파일 저장 default로 rewrite. chat에는 Summary + 경로만 echo. |
+| 3 | SKILL.md Stage 5 step 2 | `notion-read` only / 미지정 시 "Markdown 파일이 deliverable" 명시 |
+| 4 | SKILL.md Stage 5 step 3 | Notion write는 파일 저장 후 추가 단계로 위치 명확화 |
+| 5 | SKILL.md Constraints | "`Write`는 TC output 전용" 룰 |
+| 6 | SKILL.md Anti-patterns | "Dumping full TC tables to chat" + "Writing files outside TC output directory" 2개 추가 |
+| 7 | `.claude/CLAUDE.md.example` | QA policy에 `TC output directory` 항목 (default `Docs/QA/`) |
+| 8-9 | CHANGELOG.md | Unreleased "Added"에 파일 저장 default + 관련 안전장치 명시. xlsx/csv는 여전히 v0.4 이연으로 표시 |
+
+### 보안 영향 검토 (Write 권한 추가)
+
+v0.1.1 보강에서 `allowed-tools`를 minimum-required로 축소한 원칙에 일부 거스르지만:
+- 로컬 파일 쓰기는 exfiltration 경로 아님 (Notion-create-comment 같은 외부 writeback과 다름)
+- 사용 범위를 SKILL.md Constraints + Anti-patterns 2곳에 명시적으로 박음 (Docs/QA/ 외 어디든 쓰기 금지)
+- frontmatter는 여전히 pre-approval. 실 안전성은 본문 룰 + 모델 행동에 의존 (이건 v0.1.1 R5 경고문대로)
+
+### 다음 회사 프로젝트 적용 시 자동 반영
+
+bomphago_Unity6 등 이미 설치된 회사 프로젝트는 다음 적용 시 `bootstrap.ps1 -TargetProject <path>` 재실행 → 변경된 SKILL.md 자동 갱신. CLAUDE.md는 사용자가 `TC output directory` 항목 명시하면 그 경로, 아니면 default `Docs/QA/`.
+
+### bomphago 이번 1회 처리
+
+bomphago 세션은 사용자가 "Docs/QA/에 파일로 만들어줘"라고 이미 명시 → 그쪽 세션이 파일 만들고 있음. 이번 1회는 사용자가 수동 지시했으나 다음부터는 자동.
+
+### 잔여 후보 갱신 (이번 entry 직전 작업)
+
+- ~~Stage 5 파일 저장 default~~ 완료
+- xlsx/csv 변환은 여전히 v0.4 이연 (별도 작업이므로 분리)
+
+---
+
 ## 새 세션을 시작할 때
 
 1. **이 파일을 먼저 읽기** (위 표가 컨텍스트 전부)

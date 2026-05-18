@@ -4,7 +4,7 @@ description: Generates Android executable and iOS prepared test cases from git d
 argument-hint: "[android|ios|both] [diff-range] [notion-read|notion-draft|notion-write]"
 version: 0.1.0
 disable-model-invocation: true
-allowed-tools: Read Glob Grep Bash(git status*) Bash(git diff*) Bash(git show*) Bash(git log*) Bash(git rev-parse*) Bash(git merge-base*) mcp__notion__notion-fetch mcp__notion__notion-create-pages
+allowed-tools: Read Write Glob Grep Bash(git status*) Bash(git diff*) Bash(git show*) Bash(git log*) Bash(git rev-parse*) Bash(git merge-base*) mcp__notion__notion-fetch mcp__notion__notion-create-pages
 ---
 
 # mobile-build-tc-from-diff
@@ -85,12 +85,17 @@ This stage exists because patch notes and diffs disagree more often than is comf
 
 ### Stage 5 — Output
 
-1. Always render the full Markdown document first (Summary → Android TCs → iOS Prepared TCs → Cross-source flags → Notes for human reviewer). The Markdown is the canonical output; Notion write is a downstream copy. If Stage 3 paused for a scope decision, render the Markdown only after the user-agreed scope.
-2. If Notion mode is `notion-read` only: stop here. Output Markdown.
-3. If Notion mode is `notion-draft` or `notion-write`:
+1. **Save the canonical output to a Markdown file, then echo a short summary to the chat.**
+   - **File path**: `<output-directory>/TC_<YYYY-MM-DD>_<range-tag>.md`, relative to the project root. The output directory is `Docs/QA/` by default; if `CLAUDE.md` specifies a `TC output directory` field, use that instead. `<range-tag>` is a filesystem-safe form of the commit range — replace `/`, `.`, and `..` with `-` and `_to_` respectively (e.g., `release/v2.3.x..HEAD` → `release-v2.3.x_to_HEAD`).
+   - **File contents** (the full canonical output): Summary → Android TCs → iOS Prepared TCs → Cross-source flags → Notes for human reviewer.
+   - **Chat echo** (keep it short): the Summary block, the saved file path, the Cross-source flag count, and any Stage 3 scope decisions. **Do not echo the full TC tables to the chat** — the file is the canonical output. Echoing duplicates the result and wastes conversation tokens.
+   - If the output directory does not exist, create it (the `Docs/QA/` default is created as needed). If file write fails (permission denied, disk full, etc.), report the failure explicitly and fall back to in-chat full Markdown output — but say "fell back to chat output because file write failed" so the user knows to fix permissions before the next invocation.
+   - If Stage 3 paused for a scope decision, save and echo only after the user-agreed scope.
+2. If Notion mode is `notion-read` only (or absent): stop here. The Markdown file is the deliverable; the chat echo confirms its path.
+3. If Notion mode is `notion-draft` or `notion-write` (the Markdown file is still always saved first — Notion is an additional downstream write, not a replacement):
    - Follow the schema-confirmation protocol in `references/notion-output-schema.md`. Discover the target database properties, propose a mapping, show it to the user, and wait for explicit confirmation.
    - On confirmation, write rows. `notion-draft` writes rows with status `Draft`. `notion-write` requires an additional one-time user confirmation per invocation before the final write.
-   - Never modify or delete existing rows. Never create properties on the database. If any required field has no property match, abort the write and keep the Markdown output as the result.
+   - Never modify or delete existing rows. Never create properties on the database. If any required field has no property match, abort the Notion write and keep the Markdown file as the result.
 4. If a Notion write fails partway through: stop writing, report the rows that succeeded and the rows that did not, and revert nothing automatically. The user decides whether to retry, clean up, or accept the partial state.
 
 ## Constraints (non-negotiable)
@@ -103,6 +108,7 @@ This stage exists because patch notes and diffs disagree more often than is comf
 - **No real data in output.** Generic placeholders for any field that would otherwise leak company information.
 - **Notion writes are gated.** No automatic writes. `notion-draft` and `notion-write` require user confirmation after schema mapping is shown.
 - **`allowed-tools` is pre-approval, not a sandbox.** The frontmatter list above declares which tools the skill MAY call. Whether each call is appropriate at each step is enforced only by the workflow rules in this file's body. Downstream users must not infer that the frontmatter alone makes the skill safe.
+- **`Write` is for TC output only.** The skill has `Write` permission to save the canonical TC Markdown file at the path defined by Stage 5 step 1 (default `Docs/QA/`). Writing any other file, anywhere else on the filesystem, is out of scope. No log files, no cache files, no auxiliary copies, no scratch artifacts.
 
 ## Output format
 
@@ -128,6 +134,8 @@ These are observed failure modes. The skill must avoid all of them.
 - **TCs for code with no observable user behavior.** Internal refactors that don't change behavior produce no TCs; they may produce a Cross-source flag if the patch note claims user-visible improvement.
 - **Real data in output.** Real company names, real account IDs, real Notion URLs, real keystore paths, environment variables (`$HOME`, `$USER`, API tokens), absolute filesystem paths outside the repo, or user identity (name, email) extracted from local project files. Every output is reviewable by people outside the team. The Source/Risk column is free-form rich text and the easiest place to leak — keep it strictly limited to git path + commit hash + Notion section + risk category from taxonomy.
 - **Generating TCs to "cover" unverified Notion claims.** If the **patch note** claims a fix the diff doesn't show, that's a Cross-source flag, not a TC. The **dev note** is treated differently: as an internal technical document it is higher-trust, so when a dev-note claim has no direct diff evidence (e.g., a server-side change referenced in dev note without a paired client change), generate a TC and mark the Source/Risk column with `dev-note only, diff unverified` so a human reviewer can verify it. Never generate a TC when neither the patch note nor the dev note supports the claim.
+- **Dumping the full TC tables into the chat instead of (or in addition to) the file.** Stage 5 step 1 is explicit: the file is the canonical output, the chat echo is a short summary. Echoing the full Markdown to chat duplicates the result, wastes the user's conversation tokens, and signals the skill did not actually save the file — a downstream user will then have to copy-paste from chat into a file by hand, which is the failure mode this design exists to prevent.
+- **Writing files outside the intended TC output directory.** Stage 5 writes a single Markdown file at the path defined in Stage 5 step 1 (default `Docs/QA/`, or the `TC output directory` field of `CLAUDE.md`). The skill must not write any other files anywhere else. If file write fails, report the failure and fall back to in-chat output; do not silently retry to a different path.
 
 ## References
 
