@@ -7,6 +7,61 @@ Claude Code 세션은 로컬 머신 단위로 저장됨(`~/.claude/projects/...`
 
 ---
 
+## 2026-05-22 — 프로젝트 분석/시나리오 TC 양식 반영
+
+### 의도
+
+사용자 목표를 "diff 기반 TC 생성"에서 한 단계 확장: 임의의 모바일 게임 프로젝트를 먼저 가볍게 분석/역기획하고, 기능/콘텐츠/미니게임별로 "어떤 상황에서 성공/실패가 어떻게 보여야 하는지" 중심의 정량 TC를 뽑도록 문서와 skill 절차를 보강.
+
+### 적용한 방향
+
+| 옵션 | 판단 |
+|---|---|
+| A. 가이드 문서만 추가 | 너무 약함. SKILL이 안 읽으면 실제 출력이 안 바뀜 |
+| B. 양식 문서 + SKILL 단계 연결 | 채택. 기존 slash command 유지하면서 출력 스타일을 바꿀 수 있음 |
+| C. Claude/Codex core spec 대개편 | 보류. 구조 개편보다 TC 품질 축을 먼저 고정 |
+
+### 변경 내용
+
+- `references/scenario-tc-template.md` 신규: Reverse-spec snapshot, Scenario coverage matrix, 기능/상황/성공/실패 TC 작성 규칙, 미니게임/콘텐츠 다건 변경 시 최소 커버리지와 batch 기준.
+- SKILL.md Stage 0 추가: project facts/docs/scene/prefab/script 구조를 근거로 짧은 역기획 스냅샷을 만든 뒤 TC 생성.
+- SKILL.md Stage 3/5 갱신: Scenario coverage matrix를 상세 TC 앞에 출력하고, 콘텐츠/미니게임별 상황을 flatten하지 않도록 명시.
+- `.claude/CLAUDE.md.example`에 `Game / content map` 추가: 메인 루프, 미니게임, 단계, 결과/보상, backend submission, 실패 시나리오를 downstream 프로젝트별로 기록.
+- `docs/codex-portability.md` 신규: Codex에서 `.claude/skills` 자동 발견 없이 SKILL.md와 scenario template을 절차 문서로 읽어 실행하는 runbook.
+- `sample-output-tc-table.md`에 Reverse-spec snapshot / Scenario coverage matrix 예시 추가.
+- `functional-evals.yaml`에 미니게임 단계 진행 + backend submission 시나리오 케이스 추가.
+- README/AGENTS/CHANGELOG 동기화.
+
+### 남은 판단
+
+- `.agents/skills` mirror는 아직 보류. 지금은 `docs/codex-portability.md` adapter 방식으로 drift를 줄임.
+- Windows/PowerShell 전용 diff 수집 스크립트와 TC lint gate는 별도 후속 후보.
+
+---
+
+## 2026-05-22 — downstream 프로젝트 경로 registry 추가
+
+### 의도
+
+coggames_Unity6 / bomphago_Unity6처럼 이미 bootstrap으로 설치한 downstream 프로젝트들을 이후 patch-to-tc 세션에서 반복 업데이트하기 쉽게 로컬 경로 registry를 둠.
+
+### 결정
+
+| 옵션 | 판단 |
+|---|---|
+| 실제 경로를 tracked docs에 저장 | 거부. 회사/개인 로컬 경로 노출 위험 |
+| gitignored local registry만 사용 | 채택 |
+| 별도 스크립트로 일괄 업데이트까지 자동화 | 보류. 먼저 문서/registry 방식으로 충분 |
+
+### 변경
+
+- `docs/downstream-projects.md` 신규: registry 양식과 업데이트 요청 문구, bootstrap 실행 규칙 설명.
+- `downstream-projects.local.md` 신규: gitignored 로컬 파일. 사용자가 실제 경로를 직접 채우는 위치.
+- `.gitignore`에 `downstream-projects.local.md`, `docs/downstream-projects.local.md` 추가.
+- README에 여러 downstream 프로젝트 관리 섹션 추가.
+
+---
+
 ## 2026-05-15 — v0.1 안정화 세션
 
 ### 완료된 commits (origin/main push 완료)
@@ -272,7 +327,7 @@ bomphago 세션은 사용자가 "Docs/QA/에 파일로 만들어줘"라고 이�
 ## 새 세션을 시작할 때
 
 1. **이 파일을 먼저 읽기** (위 표가 컨텍스트 전부)
-2. `README.md` → 외부 사용자 시점 (현재 v0.1 bootstrap 상태)
+2. `README.md` → 외부 사용자 시점 (현재 pre-1.0 active template 상태)
 3. `CLAUDE.md` → 이 repo 작업 룰 (이번 세션에서 변경 없음)
 4. `.claude/skills/mobile-build-tc-from-diff/SKILL.md` → 본 skill 본문 (이번 세션에서 가장 많이 수정됨)
 

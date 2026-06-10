@@ -12,6 +12,11 @@ For session-level internal notes, see `WORK_LOG.md`.
 ## [Unreleased]
 
 ### Added
+- `references/scenario-tc-template.md`: canonical reverse-spec and scenario TC style. TCs now emphasize feature/content, situation, success path, failure/edge handling, staged mini-game progression, and backend result submission when relevant.
+- SKILL.md Stage 0: lightweight project analysis / reverse-spec snapshot before TC generation. Final output now includes Reverse-spec snapshot and Scenario coverage matrix before detailed TC tables.
+- `docs/codex-portability.md`: Codex adapter runbook for using the Claude skill as a procedure document when `.claude/skills` auto-discovery is unavailable.
+- `.claude/CLAUDE.md.example`: new `Game / content map` and scenario coverage fields for content-heavy mobile games.
+- `functional-evals.yaml`: new content-heavy mini-game scenario case that requires Reverse-spec snapshot, Scenario coverage matrix, staged progression, backend submission, retry, and duplicate-prevention coverage.
 - **Stage 5 file output is now the default** (resolves the v0.2.0 design gap discovered during the first downstream trial). The skill saves the canonical Markdown to `<TC output directory>/TC_<YYYY-MM-DD>_<range-tag>.md` (default `Docs/QA/`) and echoes only a short summary + the file path to the chat. The previous behavior — full TC tables dumped into the conversation — burned conversation tokens and forced the user to hand-copy results into a file before they could be reused.
 - SKILL.md frontmatter: `Write` added to `allowed-tools` (required for file save). Scope is explicitly limited to TC output only — see Constraints and Anti-patterns sections.
 - `.claude/CLAUDE.md.example` QA policy section: new `TC output directory` field (default `Docs/QA/` if absent or left as placeholder).

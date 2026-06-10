@@ -18,6 +18,34 @@ This is the **target output format** of the skill. Reviewers and downstream user
 
 ---
 
+## Reverse-spec snapshot
+
+| Item | Inferred project fact |
+|---|---|
+| Project type | Unity mobile game with seasonal content, referral flow, notification settings, and server-dependent reward state |
+| Main loop | Launch → login/session restore → open content or season pass → perform action → result/reward → server sync |
+| Content groups | Season Pass, Content Loading, Referral, Notification Settings, Lifecycle/Resume, Chat |
+| Progression | Season pass reward tiers and daily missions; no full stage ladder detected in this sample |
+| Data persistence | Save migration, Addressables cache, reward claim state, notification preferences |
+| Backend/server submission | Referral redemption, reward claim idempotency, chat socket readiness |
+| Failure surfaces | Corrupt save, cache miss, network failure, permission denial/version split, app background/resume |
+| Changed scope | 13 files across migration, async loading, referral UI/API, notification permission, lifecycle resume |
+
+---
+
+## Scenario coverage matrix
+
+| Feature / Content | Situation | Success path | Failure / edge path | TC IDs |
+|---|---|---|---|---|
+| Season Pass | v1→v2 migration and season 5 reward display | Existing claims preserved, season 5 tiers visible | Corrupt save recovers without crash or duplicate reward | `AND-pass-001`, `AND-pass-002`, `AND-pass-003`, `IOS-pass-004` |
+| Content Loading | Cold start and cache miss after async refactor | Content list renders within target time | Concurrent loads/cache miss do not dead-end or race | `AND-content-004`, `AND-content-005`, `AND-content-006`, `IOS-content-001`, `IOS-content-006` |
+| Referral | Entry screen and redeem request | Valid code grants visible reward notification | Invalid code or network drop has retry-able error and no double redemption | `AND-referral-007`, `AND-referral-008`, `AND-referral-009`, `AND-referral-010`, `IOS-referral-005` |
+| Notification Settings | Android 13+ permission and category toggles | Prompt appears, categories persist after restart | Android 12 and below do not show a new permission prompt | `AND-notif-011`, `AND-notif-012`, `AND-notif-013`, `IOS-notif-003` |
+| Lifecycle / Resume | App background and foreground after GL context fix | UI restores on return without black screen | Camera intent/deep background do not lose state | `AND-lifecycle-014`, `AND-lifecycle-015`, `AND-lifecycle-016`, `IOS-lifecycle-002` |
+| Chat | Login → chat readiness after handshake timing fix | Recent messages appear within 3s | No stale empty state before socket ready | `AND-chat-018` |
+
+---
+
 ## Android TCs
 
 | TC ID | Type | Priority | Title | Preconditions | Steps | Expected Result | Automation Candidate | Source/Risk |

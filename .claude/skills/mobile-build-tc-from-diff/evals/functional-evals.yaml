@@ -265,6 +265,47 @@ cases:
       labels, and taxonomy risk categories in Source/Risk. No env var, no
       absolute filesystem path outside the repo, no user identity, no token.
 
+  # ============================================================
+  # Case 10: Content-heavy mini-game scenario matrix
+  # ============================================================
+  - id: minigame-stage-scenario-matrix
+    description: |
+      A content-heavy mobile game changes multiple mini-games and staged
+      progression. Skill should not flatten the project into generic rows.
+      It should first produce a reverse-spec snapshot and scenario coverage
+      matrix, then link detailed TCs to content/stage/backend situations.
+    mock_inputs:
+      diff_summary: |
+        Modified Assets/Scenes/MiniGame_A.unity
+        Modified Assets/Prefabs/MiniGameA/Stage01.prefab
+        Modified Assets/Prefabs/MiniGameA/Stage10.prefab
+        Modified Assets/Scripts/MiniGameA/ResultSubmitter.cs
+        Modified Assets/Scripts/Common/BackendClient.cs
+      commit_messages:
+        - "feat(minigame-a): rebalance stage 1-10 and submit result payload"
+      patch_note: "미니게임 A 1~10단계 난이도 조정 및 결과 저장 개선"
+      dev_note: |
+        MiniGame_A now submits stage clear result to backend after the result screen.
+        Failed submission retries once and does not duplicate rewards.
+    must_include:
+      - "Reverse-spec snapshot"
+      - "Scenario coverage matrix"
+      - "MiniGame_A"
+      - "stage 1-10"
+      - "backend"
+      - "result"
+      - "retry"
+      - "duplicate"
+      - "AND-minigame"
+    must_not_include:
+      - "Verify MiniGame works"
+      - "all mini-games in one TC"
+      - "server URL"
+    expected_behavior: |
+      Output groups MiniGame_A as its own content group, includes a success
+      path for 1-10 progression/result submission, and includes a failure/edge
+      path for submission retry/no duplicate reward.
+
 # ============================================================
 # Notes for failures
 # ============================================================

@@ -20,7 +20,8 @@ This repo is a worked example of that idea, applied to a concrete problem: turni
 
 ## What you get
 
-- A Claude Code project skill (`/mobile-build-tc-from-diff`) that reads git changes and (optionally) Notion patch notes, then produces both automated test stubs and manual QA checklists.
+- A Claude Code project skill (`/mobile-build-tc-from-diff`) that reads project facts, git changes, and optional Notion patch notes, then produces scenario-style mobile build TCs.
+- A lightweight reverse-spec step for games with multiple modes, mini-games, stages, rewards, local saves, or backend result submission.
 - Documentation explaining the design choices, so you can adapt it to your own project rather than copy-pasting.
 - Example inputs/outputs so you can see what good looks like before running it on real data.
 
@@ -48,7 +49,7 @@ Pick one of four methods:
 
 ### 3. Customize your project's CLAUDE.md (one time)
 
-The skill reads project-specific facts (Unity version, build command, target devices, QA policy, etc.) from your project's `.claude/CLAUDE.md`.
+The skill reads project-specific facts (Unity version, build command, target devices, QA policy, content map, scenario coverage rules, etc.) from your project's `.claude/CLAUDE.md`.
 
 **Easiest path** — re-run bootstrap with the setup flag:
 
@@ -60,7 +61,7 @@ The skill reads project-specific facts (Unity version, build command, target dev
 ./bootstrap.sh <path> --setup-claude-md
 ```
 
-This copies `.claude/CLAUDE.md.example` to `<project>/.claude/CLAUDE.md` only if no `CLAUDE.md` exists there yet — your existing `CLAUDE.md` is never overwritten. After the copy, open the file and replace `<placeholders>` with your project facts.
+This copies `.claude/CLAUDE.md.example` to `<project>/.claude/CLAUDE.md` only if no `CLAUDE.md` exists there yet — your existing `CLAUDE.md` is never overwritten. After the copy, open the file and replace `<placeholders>` with your project facts. For games with multiple contents or mini-games, fill in the `Game / content map` section; the skill uses it to group scenario TCs by mode, stage, result, reward, and backend submission flow.
 
 **Manual alternative**:
 
@@ -92,6 +93,10 @@ Or invoke with explicit arguments:
 > /mobile-build-tc-from-diff both v2.3.0..HEAD notion-read
 ```
 
+### Codex usage
+
+Codex does not currently auto-discover `.claude/skills/`. Use `docs/codex-portability.md` as the adapter runbook and ask Codex to read `.claude/skills/mobile-build-tc-from-diff/SKILL.md` plus `references/scenario-tc-template.md` as procedure documents.
+
 ### 5. Updating later
 
 ```bash
@@ -104,6 +109,10 @@ git pull
 Re-running `bootstrap` is safe — unchanged files are skipped via SHA-256 hash compare.
 
 > **No automatic update notification.** The skill does not check the remote for new versions on its own — adding that capability would require an external-fetch permission in the SKILL.md frontmatter, which the v0.1.1 security review explicitly tightened. Set a calendar reminder (monthly is reasonable) or re-run these commands whenever you start a major task that uses the skill. See `docs/v0.3-design.md` §3 for the rationale.
+
+### Multiple downstream projects
+
+If you apply patch-to-tc to several local projects, keep their paths in `downstream-projects.local.md` and follow `docs/downstream-projects.md`. The local file is gitignored so company/personal project paths do not get committed.
 
 ---
 
@@ -127,6 +136,8 @@ mobile-tc-harness/
 │   ├── ios-prepared-guidelines.md
 │   ├── notion-mcp-safety.md
 │   ├── eval-strategy.md
+│   ├── downstream-projects.md
+│   ├── codex-portability.md
 │   └── v0.3-design.md           ← v0.3 design notes (deferred features)
 └── .claude/
     ├── CLAUDE.md.example        ← template for downstream projects
@@ -135,6 +146,7 @@ mobile-tc-harness/
             ├── SKILL.md
             ├── references/
             │   ├── tc-taxonomy.md
+            │   ├── scenario-tc-template.md
             │   ├── notion-context-policy.md
             │   ├── notion-output-schema.md
             │   └── pairwise-strategy.md
@@ -182,7 +194,7 @@ The skill treats Notion content as **context, not source of truth**. If `git dif
 - **Not a chat prompt.** This is a structured skill with input boundaries, output schema, and evaluation cases.
 - **Not a one-size-fits-all generator.** You will customize `CLAUDE.md` and `references/tc-taxonomy.md` for your project. The template tells you what to fill in.
 - **Not a replacement for human QA.** TCs go to humans for review. Source/Risk columns make the AI's reasoning auditable.
-- **Not production-tested at scale.** This is v0.1. Use it as a learning artifact and a starting point.
+- **Not production-tested at scale.** This is pre-1.0. Use it as a learning artifact and a starting point.
 
 ---
 

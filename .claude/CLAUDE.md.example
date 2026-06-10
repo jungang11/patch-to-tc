@@ -10,6 +10,7 @@
 
 - **Name**: <YourProjectName>
 - **Type**: <Unity mobile app / native Android / React Native / etc.>
+- **Genre / domain**: <mobile game genre, learning app, quiz app, puzzle app, etc.>
 - **Stage**: <new build / mature product / in maintenance>
 - **Team size**: <solo / small / medium / large>
 
@@ -54,11 +55,24 @@
 └── ...
 ```
 
+## Game / content map
+
+- **Main user loop**: <e.g., login → select mini-game → play stage → result → reward → server sync>
+- **Primary modes / mini-games**:
+  - `<ModeOrMiniGameA>`: <entry point, stage count/range, success condition, failure condition>
+  - `<ModeOrMiniGameB>`: <entry point, stage count/range, success condition, failure condition>
+- **Progression model**: <e.g., stage 1-10, daily missions, tutorial → normal → hard>
+- **Result / reward flow**: <what is shown locally, what is saved, what is sent to backend>
+- **Backend submission points**: <e.g., score upload, attendance, reward claim, analytics event — use generic names, no real URLs>
+- **Important failure scenarios**: <network drop, app background, timeout, invalid input, duplicate reward, retry>
+
 ## QA policy
 
 - **Build Gates** (must pass before any release):
   - <e.g., Android build + APK install + first-launch smoke>
 - **Smoke test path**: <one-paragraph description of "the critical user flow">
+- **Scenario TC style**: <e.g., 기능/콘텐츠별로 "어떤 상황에서 성공/실패가 어떻게 보이는지"를 중심으로 작성>
+- **Minimum content coverage**: <e.g., changed mini-games get 1 success path + 1 failure/edge path + backend submission check>
 - **Regression priorities**:
   - P0 = <define: e.g., crash, data loss, payment failure>
   - P1 = <define>

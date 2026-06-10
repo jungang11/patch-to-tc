@@ -8,9 +8,9 @@ This file is read by Claude Code at the start of every session. It is the workin
 
 ## What this repo is
 
-`mobile-tc-harness` is a public template repository for a Claude Code project skill that generates mobile app test cases from git diff + (optional) Notion patch notes. The goal is a **portable, learning-quality artifact** — not a one-click product.
+`mobile-tc-harness` is a public template repository for a Claude Code project skill that generates mobile app scenario test cases from project analysis + git diff + (optional) Notion patch notes. The goal is a **portable, learning-quality artifact** — not a one-click product.
 
-The repo is currently at **v0.1 bootstrap**: most files contain placeholder structure that you (Claude) will fill in. Your job is to research the reference repos, then write the skill, references, scripts, and evals.
+The repo is currently a **pre-1.0 active template**: the core skill, references, bootstrap scripts, eval scaffolding, and downstream project template already exist. Your job is to evolve them carefully, keep docs synchronized, and preserve portability across downstream projects.
 
 ---
 
@@ -92,7 +92,7 @@ Do NOT use:
 
 ## Output style
 
-- Korean is fine when explaining to me; SKILL.md and references that ship to users should be **English** (these are public, and English is the de facto language of the Agent Skills ecosystem).
+- Korean is the default language for explanations and project docs in this repo. Existing English public docs may remain English unless the task explicitly updates them.
 - Code blocks for shell commands.
 - Tables for comparisons.
 - No unnecessary preamble like "Great question!" — just answer.
